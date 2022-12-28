@@ -3,9 +3,11 @@
 // Created by vrsp on 28. 12. 2022.
 //
 
+#include "Tank.h"
 #include <SDL.h>
-#include <SDL_image.h>
+//#include <SDL_image.h>
 #include <iostream>
+#include "list"
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
@@ -21,9 +23,15 @@ public:
     int loop();
     void update();
     void draw();
+    int readClientInput();
+    void checkBorders();
+
+    void initializeWindow();
 
 private:
     SDL_Rect *tank;
+    Tank* clientTank_;
+    std::list<Tank*>* otherTanks;
 
     SDL_Window *window;
     SDL_Surface *windowSurface;
