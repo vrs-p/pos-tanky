@@ -5,12 +5,9 @@
 #ifndef KLIENT_TANK_H
 #define KLIENT_TANK_H
 #include "SDL.h"
+#include "Bullet.h"
 //#include <SDL_image.h>
 
-enum DIRECTION {UP,
-                DOWN,
-                LEFT,
-                RIGHT};
 
 class Tank {
 public:
@@ -21,6 +18,7 @@ public:
     void moveDown();
     void moveLeft();
     void moveRight();
+    void fire();
 
     void render(SDL_Renderer& renderer);
 
@@ -30,7 +28,7 @@ public:
 
 private:
     SDL_Rect *tankIcon_;
-    SDL_Rect bullet;
+    Bullet* bullet_;
     double speed_;
     double reloadTime_;
     DIRECTION direction_;

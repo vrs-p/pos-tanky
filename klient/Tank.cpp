@@ -13,11 +13,15 @@ Tank::Tank() {
     this->tankIcon_->h = 40;
     this->direction_ = UP;
 
+    this->bullet_ = new Bullet();
+
 }
 
 Tank::~Tank() {
     delete this->tankIcon_;
+    delete this->bullet_;
     tankIcon_ = nullptr;
+    bullet_ = nullptr;
 }
 
 SDL_Rect *Tank::getIcon() {
@@ -61,6 +65,12 @@ void Tank::moveRight() {
 }
 
 void Tank::render(SDL_Renderer &renderer) {
+    if (this->bullet_->wasFired())
+        this->bullet_->render(renderer);
     SDL_RenderDrawRect(&renderer, this->tankIcon_);
+}
+
+void Tank::fire() {
+    this->bullet_->shotBullet(this->tankIcon_->x, this->tankIcon_->y, this->direction_);
 }
 

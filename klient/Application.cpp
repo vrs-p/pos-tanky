@@ -81,6 +81,9 @@ int Application::readClientInput() {
                     case SDL_SCANCODE_RIGHT:
                         this->clientTank_->moveRight();
                         break;
+                    case SDL_SCANCODE_SPACE:
+                        this->clientTank_->fire();
+                        break;
                     default:
                         break;
                 }
