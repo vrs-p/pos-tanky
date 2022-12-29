@@ -1,7 +1,7 @@
 //
 // Created by filip on 28. 12. 2022.
 //
-#include "SDL.h"
+#include <SFML/Graphics.hpp>
 
 enum DIRECTION {UP,
     DOWN,
@@ -13,13 +13,13 @@ public:
     Bullet();
     ~Bullet();
 
-    bool wasFired();
+    bool wasFired() const;
     void shotBullet(int xPosition, int yPosition, DIRECTION direction);
     void moveBullet();
-    void render(SDL_Renderer& renderer);
+    void render(sf::RenderWindow& renderer);
 private:
-    SDL_Rect* bulletIcon_;
-    double speed_;
+    sf::CircleShape* bulletIcon_;
+    float speed_;
     bool fired_;
     DIRECTION direction_;
 };

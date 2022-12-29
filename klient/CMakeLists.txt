@@ -3,12 +3,13 @@ project(klient)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SDL2_INCLUDE_DIR ../include)
-set(SDL2_LIB_DIR ../lib/x64)
+set(SFML_STATIC_LIBRARIES TRUE)
+set(SFML_DIR C:/Users/filip/Desktop/POS/sfml/lib/cmake/SFML)
+find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIR})
-link_directories(${SDL2_LIB_DIR})
+include_directories(C:/Users/filip/Desktop/POS/sfml/include)
+
 
 add_executable(klient main.cpp Tank.cpp Tank.h Application.cpp Application.h Bullet.h Bullet.cpp)
 
-target_link_libraries(klient SDL2main SDL2)
+target_link_libraries(klient sfml-system sfml-window sfml-graphics sfml-audio)
