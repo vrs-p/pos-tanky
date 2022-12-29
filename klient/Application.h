@@ -2,11 +2,10 @@
 //
 // Created by vrsp on 28. 12. 2022.
 //
-
-#include <SDL.h>
 #include <iostream>
 #include <list>
 #include <thread>
+#include <SFML/Graphics.hpp>
 #include "Tank.h"
 //#include <SDL_image.h>
 
@@ -25,7 +24,6 @@ public:
     void render();
     void readClientInput();
     void checkBorders();
-    void update();
     void draw();
     void initializeWindow();
 
@@ -37,10 +35,7 @@ private:
     Tank* clientTank_;
     std::list<Tank*>* otherTanks;
 
-    SDL_Window *window;
-    SDL_Surface *windowSurface;
-    SDL_Event windowEvent;
-    SDL_Renderer *renderer;
+    sf::RenderWindow* window_;
 };
 
 

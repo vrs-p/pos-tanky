@@ -4,7 +4,7 @@
 
 #ifndef KLIENT_TANK_H
 #define KLIENT_TANK_H
-#include "SDL.h"
+#include <SFML/Graphics.hpp>
 #include "Bullet.h"
 //#include <SDL_image.h>
 
@@ -20,16 +20,16 @@ public:
     void moveRight();
     void fire();
 
-    void render(SDL_Renderer& renderer);
+    void render(sf::RenderWindow& renderer);
 
-    SDL_Rect * getIcon();
+    sf::RectangleShape * getIcon();
     double getSpeed() const;
     double getReloadTime();
 
 private:
-    SDL_Rect *tankIcon_;
+    sf::RectangleShape* tankIcon_;
     Bullet* bullet_;
-    double speed_;
+    float speed_;
     double reloadTime_;
     DIRECTION direction_;
 };

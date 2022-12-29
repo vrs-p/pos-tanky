@@ -5,12 +5,11 @@
 #include "Tank.h"
 
 Tank::Tank() {
-    this->speed_ = 100;
+    this->speed_ = 5.0;
     this->reloadTime_ = 5;
 
-    this->tankIcon_ = new SDL_Rect;
-    this->tankIcon_->w = 20;
-    this->tankIcon_->h = 40;
+    this->tankIcon_ = new sf::RectangleShape();
+    this->tankIcon_->setSize(sf::Vector2f(20, 40));
     this->direction_ = UP;
 
     this->bullet_ = new Bullet();
@@ -24,7 +23,7 @@ Tank::~Tank() {
     bullet_ = nullptr;
 }
 
-SDL_Rect *Tank::getIcon() {
+sf::RectangleShape *Tank::getIcon() {
     return this->tankIcon_;
 }
 
@@ -37,40 +36,36 @@ double Tank::getReloadTime() {
 }
 
 void Tank::moveUp() {
-    this->tankIcon_->y -= (int)this->speed_ / 20;
+    this->tankIcon_->move(sf::Vector2f(0.0f, -this->speed_));
+    this->tankIcon_->setRotation(0.f);
     this->direction_ = UP;
-    this->tankIcon_->w = 20;
-    this->tankIcon_->h = 40;
 }
 
 void Tank::moveDown() {
-    this->tankIcon_->y += (int)this->speed_ / 20;
+    this->tankIcon_->move(sf::Vector2f(0.0f, this->speed_));
+    this->tankIcon_->setRotation(180.f);
     this->direction_ = DOWN;
-    this->tankIcon_->w = 20;
-    this->tankIcon_->h = 40;
 }
 
 void Tank::moveLeft() {
-    this->tankIcon_->x -= (int)this->speed_ / 20;
+    this->tankIcon_->move(sf::Vector2f(-this->speed_, 0.0f));
+    this->tankIcon_->setRotation(270.f);
     this->direction_ = LEFT;
-    this->tankIcon_->w = 40;
-    this->tankIcon_->h = 20;
 }
 
 void Tank::moveRight() {
-    this->tankIcon_->x += (int)this->speed_ / 20;
+    this->tankIcon_->move(sf::Vector2f(this->speed_, 0.0f));
+    this->tankIcon_->setRotation(90.f);
     this->direction_ = RIGHT;
-    this->tankIcon_->w = 40;
-    this->tankIcon_->h = 20;
 }
 
-void Tank::render(SDL_Renderer &renderer) {
+void Tank::render(sf::RenderWindow &window) {
     if (this->bullet_->wasFired())
-        this->bullet_->render(renderer);
-    SDL_RenderDrawRect(&renderer, this->tankIcon_);
+        this->bullet_->render(window);
+    window.draw(*this->tankIcon_);
 }
 
 void Tank::fire() {
-    this->bullet_->shotBullet(this->tankIcon_->x, this->tankIcon_->y, this->direction_);
+    this->bullet_->shotBullet(this->tankIcon_->getPosition().x, this->tankIcon_->getPosition().y, this->direction_);
 }
 
