@@ -5,6 +5,7 @@
 #ifndef KLIENT_TANK_H
 #define KLIENT_TANK_H
 #include <SFML/Graphics.hpp>
+#include <chrono>
 #include "Bullet.h"
 //#include <SDL_image.h>
 
@@ -37,6 +38,8 @@ private:
     float speed_;
     double reloadTime_;
     DIRECTION direction_;
+
+    std::chrono::time_point<std::chrono::system_clock> lastFire_;
 };
 
 

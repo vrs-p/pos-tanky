@@ -6,7 +6,7 @@
 
 Tank::Tank() {
     this->speed_ = 5.0;
-    this->reloadTime_ = 5;
+    this->reloadTime_ = 3;
 
     this->tankTexture_ = new sf::Texture();
     this->tankTexture_->loadFromFile("../img/tankWithoutBG.png");
@@ -17,6 +17,7 @@ Tank::Tank() {
 
     this->bullet_ = new Bullet();
 
+    this->lastFire_ = std::chrono::system_clock::now();
 }
 
 Tank::~Tank() {
@@ -144,22 +145,28 @@ void Tank::render(sf::RenderWindow &window) {
 }
 
 void Tank::fire() {
-    float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
-    float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
-    switch (this->direction_) {
-        case UP:
-            this->bullet_->shotBullet(this->tankSprite_->getPosition().x + xSize / 2, this->tankSprite_->getPosition().y, this->direction_);
-            break;
-        case DOWN:
-            this->bullet_->shotBullet(this->tankSprite_->getPosition().x - xSize / 2, this->tankSprite_->getPosition().y, this->direction_);
-            break;
-        case LEFT:
-            this->bullet_->shotBullet(this->tankSprite_->getPosition().x, this->tankSprite_->getPosition().y - xSize / 2, this->direction_);
-            break;
-        case RIGHT:
-            this->bullet_->shotBullet(this->tankSprite_->getPosition().x, this->tankSprite_->getPosition().y + xSize / 2, this->direction_);
-            break;
-
+    std::chrono::duration<double> duration = std::chrono::system_clock::now() - this->lastFire_;
+    if (duration.count() > this->reloadTime_) {
+        float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+        switch (this->direction_) {
+            case UP:
+                this->bullet_->shotBullet(this->tankSprite_->getPosition().x + xSize / 2,
+                                          this->tankSprite_->getPosition().y, this->direction_);
+                break;
+            case DOWN:
+                this->bullet_->shotBullet(this->tankSprite_->getPosition().x - xSize / 2,
+                                          this->tankSprite_->getPosition().y, this->direction_);
+                break;
+            case LEFT:
+                this->bullet_->shotBullet(this->tankSprite_->getPosition().x,
+                                          this->tankSprite_->getPosition().y - xSize / 2, this->direction_);
+                break;
+            case RIGHT:
+                this->bullet_->shotBullet(this->tankSprite_->getPosition().x,
+                                          this->tankSprite_->getPosition().y + xSize / 2, this->direction_);
+                break;
+        }
+        this->lastFire_ = std::chrono::system_clock::now();
     }
 }
 
