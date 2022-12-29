@@ -1,12 +1,13 @@
 //
 // Created by filip on 28. 12. 2022.
 //
-#include "Bullet.h"
+#include "Application.h"
 
 Bullet::Bullet() {
     this->speed_ = 0.5;
     this->fired_ = false;
-    this->bulletIcon_ = new sf::RectangleShape(sf::Vector2f(4, 4));
+    this->diameter_ = 4;
+    this->bulletIcon_ = new sf::RectangleShape(sf::Vector2f(this->diameter_, this->diameter_));
 }
 
 Bullet::~Bullet() {
@@ -15,7 +16,16 @@ Bullet::~Bullet() {
 }
 
 void Bullet::shotBullet(int xPosition, int yPosition, DIRECTION direction) {
-    this->bulletIcon_->setPosition(xPosition, yPosition);
+    switch (direction) {
+        case UP:
+        case DOWN:
+            this->bulletIcon_->setPosition(xPosition - diameter_ / 2, yPosition);
+            break;
+        case LEFT:
+        case RIGHT:
+            this->bulletIcon_->setPosition(xPosition, yPosition - diameter_ / 2);
+            break;
+    }
     this->direction_ = direction;
     this->fired_ = true;
 }
@@ -23,8 +33,8 @@ void Bullet::shotBullet(int xPosition, int yPosition, DIRECTION direction) {
 void Bullet::render(sf::RenderWindow &window) {
     float xPosition = this->bulletIcon_->getPosition().x;
     float yPosition = this->bulletIcon_->getPosition().y;
-    if (xPosition > 0 && xPosition < 800 &&
-        yPosition > 0 && yPosition < 800 &&
+    if (xPosition > 0 && xPosition < SCREEN_WIDTH &&
+        yPosition > 0 && yPosition < SCREEN_HEIGHT &&
         this->fired_)
     {
         moveBullet();

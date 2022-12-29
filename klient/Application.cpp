@@ -65,17 +65,15 @@ void Application::readClientInput() {
 void Application::checkBorders() {
     float xPosition = this->clientTank_->getSprite()->getPosition().x;
     float yPosition = this->clientTank_->getSprite()->getPosition().y;
-    float width = this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
-    float height = this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
 
-    if (xPosition + width > SCREEN_WIDTH)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH - width, yPosition));
+    if (xPosition > SCREEN_WIDTH)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
 
     if (xPosition < 0)
         this->clientTank_->getSprite()->setPosition(sf::Vector2f(0, yPosition));
 
-    if (yPosition + height > SCREEN_HEIGHT)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, SCREEN_HEIGHT - height));
+    if (yPosition > SCREEN_HEIGHT)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, SCREEN_HEIGHT));
 
     if (yPosition < 0)
         this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, 0));

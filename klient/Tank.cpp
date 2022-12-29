@@ -42,27 +42,99 @@ double Tank::getReloadTime() {
 }
 
 void Tank::moveUp() {
-    this->tankSprite_->move(sf::Vector2f(0, -this->speed_));
-    this->tankSprite_->setRotation(0);
+    if (this->direction_ != UP) {
+        float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+        float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
+        switch (this->direction_) {
+            case DOWN:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - xSize,
+                        this->tankSprite_->getPosition().y - ySize));
+                break;
+            case LEFT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + (ySize - xSize),
+                        this->tankSprite_->getPosition().y - ySize));
+                break;
+            case RIGHT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
+                        this->tankSprite_->getPosition().y - (ySize - xSize)));
+                break;
+        }
+    }
     this->direction_ = UP;
+    this->tankSprite_->setRotation(0);
+    this->tankSprite_->move(sf::Vector2f(0, -this->speed_));
 }
 
 void Tank::moveDown() {
-    this->tankSprite_->move(sf::Vector2f(0, this->speed_));
-    this->tankSprite_->setRotation(180);
+    if (this->direction_ != DOWN) {
+        float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+        float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
+        switch (this->direction_) {
+            case UP:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + xSize,
+                                                            this->tankSprite_->getPosition().y + ySize));
+                break;
+            case LEFT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize,
+                                                            this->tankSprite_->getPosition().y + (ySize - xSize)));
+                break;
+            case RIGHT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - (ySize - xSize),
+                                                            this->tankSprite_->getPosition().y + ySize));
+                break;
+        }
+    }
     this->direction_ = DOWN;
+    this->tankSprite_->setRotation(180);
+    this->tankSprite_->move(sf::Vector2f(0, this->speed_));
 }
 
 void Tank::moveLeft() {
-    this->tankSprite_->move(sf::Vector2f(-this->speed_, 0));
-    this->tankSprite_->setRotation(270);
+    if (this->direction_ != LEFT) {
+        float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+        float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
+        switch (this->direction_) {
+            case UP:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + xSize - ySize,
+                                                            this->tankSprite_->getPosition().y + ySize));
+                break;
+            case DOWN:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
+                                                            this->tankSprite_->getPosition().y - ySize + xSize));
+                break;
+            case RIGHT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
+                                                            this->tankSprite_->getPosition().y + xSize));
+                break;
+        }
+    }
     this->direction_ = LEFT;
+    this->tankSprite_->setRotation(270);
+    this->tankSprite_->move(sf::Vector2f(-this->speed_, 0));
 }
 
 void Tank::moveRight() {
-    this->tankSprite_->move(sf::Vector2f(this->speed_, 0));
-    this->tankSprite_->setRotation(90);
+    if (this->direction_ != RIGHT) {
+        float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+        float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
+        switch (this->direction_) {
+            case UP:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize,
+                                                            this->tankSprite_->getPosition().y + ySize - xSize));
+                break;
+            case DOWN:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - xSize + ySize,
+                                                            this->tankSprite_->getPosition().y - ySize));
+                break;
+            case LEFT:
+                this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize,
+                                                            this->tankSprite_->getPosition().y - xSize));
+                break;
+        }
+    }
     this->direction_ = RIGHT;
+    this->tankSprite_->setRotation(90);
+    this->tankSprite_->move(sf::Vector2f(this->speed_, 0));
 }
 
 void Tank::render(sf::RenderWindow &window) {
@@ -72,6 +144,22 @@ void Tank::render(sf::RenderWindow &window) {
 }
 
 void Tank::fire() {
-    this->bullet_->shotBullet(this->tankSprite_->getPosition().x + this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x / 2, this->tankSprite_->getPosition().y, this->direction_);
+    float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
+    float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
+    switch (this->direction_) {
+        case UP:
+            this->bullet_->shotBullet(this->tankSprite_->getPosition().x + xSize / 2, this->tankSprite_->getPosition().y, this->direction_);
+            break;
+        case DOWN:
+            this->bullet_->shotBullet(this->tankSprite_->getPosition().x - xSize / 2, this->tankSprite_->getPosition().y, this->direction_);
+            break;
+        case LEFT:
+            this->bullet_->shotBullet(this->tankSprite_->getPosition().x, this->tankSprite_->getPosition().y - xSize / 2, this->direction_);
+            break;
+        case RIGHT:
+            this->bullet_->shotBullet(this->tankSprite_->getPosition().x, this->tankSprite_->getPosition().y + xSize / 2, this->direction_);
+            break;
+
+    }
 }
 
