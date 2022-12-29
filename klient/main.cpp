@@ -9,6 +9,6 @@
 
 int main(int argc, char* args[]) {
     Application app;
-    app.loop();
+    app.run();
     return 0;
 }

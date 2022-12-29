@@ -5,12 +5,7 @@
 #include "Application.h"
 
 Application::Application() {
-    this->initializeWindow();
-
-    this->clientTank_ = new Tank();
-    this->clientTank_->getIcon()->x = (SCREEN_WIDTH - tank->w) / 2;
-    this->clientTank_->getIcon()->y = (SCREEN_HEIGHT - tank->w) / 2;
-
+    this->isRunning = true;
 }
 
 Application::~Application() {
@@ -18,16 +13,17 @@ Application::~Application() {
     SDL_DestroyWindow(window);
 }
 
-int Application::loop() {
-    int close = 0;
+void Application::render() {
+    this->initializeWindow();
+    this->clientTank_ = new Tank();
+    this->clientTank_->getIcon()->x = (SCREEN_WIDTH - this->clientTank_->getIcon()->w) / 2;
+    this->clientTank_->getIcon()->y = (SCREEN_HEIGHT - this->clientTank_->getIcon()->w) / 2;
 
-    while (!close) {
-        close = this->readClientInput();
+    while (this->isRunning) {
+        this->readClientInput();
         this->checkBorders();
         this->draw();
     }
-
-    return 0;
 }
 
 void Application::update() {
@@ -54,13 +50,13 @@ void Application::draw() {
     SDL_Delay(1000 / 60);
 }
 
-int Application::readClientInput() {
+void Application::readClientInput() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
 
             case SDL_QUIT:
-                return 1;
+                this->isRunning = false;
                 break;
 
             case SDL_KEYDOWN:
@@ -89,7 +85,6 @@ int Application::readClientInput() {
                 }
         }
     }
-    return 0;
 }
 
 void Application::checkBorders() {
@@ -131,4 +126,11 @@ void Application::initializeWindow() {
         printf("Failed to create renderer!\n");
     }
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+}
+
+void Application::run() {
+    if (this->isRunning) {
+        std::thread renderingThread(&Application::render, this);
+        renderingThread.join();
+    }
 }
