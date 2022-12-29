@@ -4,10 +4,10 @@ project(klient)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SFML_STATIC_LIBRARIES TRUE)
-set(SFML_DIR C:/Users/filip/Desktop/POS/sfml/lib/cmake/SFML)
+set(SFML_DIR C:/Users/vrsp/Documents/UNIZA/5semester/POS/SFML-2.5.1/lib/cmake/SFML)
 find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
 
-include_directories(C:/Users/filip/Desktop/POS/sfml/include)
+include_directories(C:/Users/vrsp/Documents/UNIZA/5semester/POS/SFML-2.5.1/include)
 
 
 add_executable(klient main.cpp Tank.cpp Tank.h Application.cpp Application.h Bullet.h Bullet.cpp)

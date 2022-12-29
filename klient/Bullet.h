@@ -18,8 +18,9 @@ public:
     void moveBullet();
     void render(sf::RenderWindow& renderer);
 private:
-    sf::CircleShape* bulletIcon_;
+    sf::RectangleShape* bulletIcon_;
     float speed_;
     bool fired_;
+    int diameter_;
     DIRECTION direction_;
 };

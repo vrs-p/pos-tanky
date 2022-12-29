@@ -2,6 +2,7 @@
 // Created by vrsp on 28. 12. 2022.
 //
 
+#include <cmath>
 #include "Application.h"
 
 Application::Application() {
@@ -15,9 +16,9 @@ Application::~Application() {
 void Application::render() {
     this->initializeWindow();
     this->clientTank_ = new Tank();
-    float positionX = (SCREEN_WIDTH - this->clientTank_->getIcon()->getSize().x) / 2;
-    float positionY = (SCREEN_HEIGHT - this->clientTank_->getIcon()->getSize().x) / 2;
-    this->clientTank_->getIcon()->setPosition(positionX, positionY);
+    float positionX = (SCREEN_WIDTH - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x) / 2;
+    float positionY = (SCREEN_HEIGHT - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y);
+    this->clientTank_->getSprite()->setPosition(positionX, positionY);
 
     while (this->isRunning) {
         this->readClientInput();
@@ -62,26 +63,24 @@ void Application::readClientInput() {
 }
 
 void Application::checkBorders() {
-    float xPosition = this->clientTank_->getIcon()->getPosition().x;
-    float yPosition = this->clientTank_->getIcon()->getPosition().y;
-    float width = this->clientTank_->getIcon()->getSize().x;
-    float height = this->clientTank_->getIcon()->getSize().y;
+    float xPosition = this->clientTank_->getSprite()->getPosition().x;
+    float yPosition = this->clientTank_->getSprite()->getPosition().y;
 
-//    if (xPosition + width > SCREEN_WIDTH)
-//        this->clientTank_->getIcon()->x = SCREEN_WIDTH - this->clientTank_->getIcon()->w;
-//
-//    if (this->clientTank_->getIcon()->x < 0)
-//        this->clientTank_->getIcon()->x = 0;
-//
-//    if (this->clientTank_->getIcon()->y + this->clientTank_->getIcon()->h > SCREEN_HEIGHT)
-//        this->clientTank_->getIcon()->y = SCREEN_HEIGHT - this->clientTank_->getIcon()->h;
-//
-//    if (this->clientTank_->getIcon()->y < 0)
-//        this->clientTank_->getIcon()->y = 0;
+    if (xPosition > SCREEN_WIDTH)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
+
+    if (xPosition < 0)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(0, yPosition));
+
+    if (yPosition > SCREEN_HEIGHT)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, SCREEN_HEIGHT));
+
+    if (yPosition < 0)
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, 0));
 }
 
 void Application::initializeWindow() {
-    this->window_ = new sf::RenderWindow(sf::VideoMode(800, 800), "POS-Tanks");
+    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
 }
 
 void Application::run() {
