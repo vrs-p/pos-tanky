@@ -82,7 +82,7 @@ void Application::checkBorders() {
 }
 
 void Application::initializeWindow() {
-    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks");
+    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
 }
 
 void Application::run() {
