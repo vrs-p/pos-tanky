@@ -6,7 +6,7 @@
 Bullet::Bullet() {
     this->speed_ = 0.5;
     this->fired_ = false;
-    this->bulletIcon_ = new sf::CircleShape(5.0f);
+    this->bulletIcon_ = new sf::RectangleShape(sf::Vector2f(4, 4));
 }
 
 Bullet::~Bullet() {

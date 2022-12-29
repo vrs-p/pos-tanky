@@ -22,11 +22,16 @@ public:
 
     void render(sf::RenderWindow& renderer);
 
+    sf::Sprite * getSprite();
+
     sf::RectangleShape * getIcon();
     double getSpeed() const;
     double getReloadTime();
 
 private:
+    sf::Texture* tankTexture_;
+    sf::Sprite* tankSprite_;
+
     sf::RectangleShape* tankIcon_;
     Bullet* bullet_;
     float speed_;
