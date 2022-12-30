@@ -2,7 +2,6 @@
 // Created by vrsp on 28. 12. 2022.
 //
 
-#include <cmath>
 #include "Application.h"
 
 Application::Application() {

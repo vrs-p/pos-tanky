@@ -12,7 +12,7 @@ Tank::Tank() {
     this->tankSprite_ = new sf::Sprite();
     this->bullet_ = new Bullet();
 
-    this->tankTexture_->loadFromFile("../img/tankWithoutBG.png");
+    this->tankTexture_->loadFromFile("../../img/tankWithoutBG.png");
     this->tankSprite_->setTexture(*this->tankTexture_);
     this->tankSprite_->setScale(sf::Vector2f(0.05,0.05));
     this->direction_ = UP;

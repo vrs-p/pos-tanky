@@ -7,7 +7,6 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include "Bullet.h"
-//#include <SDL_image.h>
 
 
 class Tank {

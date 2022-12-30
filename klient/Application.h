@@ -5,10 +5,10 @@
 #include <iostream>
 #include <list>
 #include <thread>
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include "Tank.h"
-//#include <SDL_image.h>
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
