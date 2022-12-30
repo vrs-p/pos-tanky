@@ -38,6 +38,7 @@ private:
 
     Tank* clientTank_;
     std::list<Tank*>* otherTanks;
+
     Tank* otherClientTank_;
 
     sf::RenderWindow* window_;
