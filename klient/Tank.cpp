@@ -9,13 +9,14 @@ Tank::Tank() {
     this->reloadTime_ = 3;
 
     this->tankTexture_ = new sf::Texture();
-    this->tankTexture_->loadFromFile("../img/tankWithoutBG.png");
     this->tankSprite_ = new sf::Sprite();
+    this->bullet_ = new Bullet();
+
+    this->tankTexture_->loadFromFile("../img/tankWithoutBG.png");
     this->tankSprite_->setTexture(*this->tankTexture_);
     this->tankSprite_->setScale(sf::Vector2f(0.05,0.05));
     this->direction_ = UP;
 
-    this->bullet_ = new Bullet();
 
     this->lastFire_ = std::chrono::system_clock::now();
 }
@@ -168,5 +169,9 @@ void Tank::fire() {
         }
         this->lastFire_ = std::chrono::system_clock::now();
     }
+}
+
+int Tank::getDirection() {
+    return static_cast<int>(this->direction_);
 }
 

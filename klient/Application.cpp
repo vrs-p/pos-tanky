@@ -7,6 +7,8 @@
 
 Application::Application() {
     this->isRunning = true;
+    this->packetSend_ = sf::Packet{};
+    this->ipAddress_ = sf::IpAddress::LocalHost;
 }
 
 Application::~Application() {
@@ -86,6 +88,24 @@ void Application::initializeWindow() {
 void Application::run() {
     if (this->isRunning) {
         std::thread renderingThread(&Application::render, this);
+        std::thread sendingThread(&Application::sendData, this);
         renderingThread.join();
+        sendingThread.join();
+    }
+}
+
+void Application::sendData() {
+    while (this->isRunning) {
+        if (this->window_ != nullptr && this->clientTank_ != nullptr) {
+            this->packetSend_.clear();
+
+            this->packetSend_ << this->clientTank_->getSprite()->getPosition().x;
+            this->packetSend_ << this->clientTank_->getSprite()->getPosition().y;
+            this->packetSend_ << this->clientTank_->getDirection();
+            this->packetSend_ << this->isRunning;
+            if (this->socket_.send(this->packetSend_, this->ipAddress_, 55000) != sf::Socket::Done) {
+                std::cout << "Sending failed" << "\n";
+            }
+        }
     }
 }

@@ -25,7 +25,7 @@ public:
 
     sf::Sprite * getSprite();
 
-    sf::RectangleShape * getIcon();
+    int getDirection();
     double getSpeed() const;
     double getReloadTime();
 

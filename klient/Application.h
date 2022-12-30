@@ -6,6 +6,7 @@
 #include <list>
 #include <thread>
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include "Tank.h"
 //#include <SDL_image.h>
 
@@ -29,6 +30,8 @@ public:
 
     void run();
 
+    void sendData();
+
 private:
     bool isRunning;
 
@@ -36,6 +39,11 @@ private:
     std::list<Tank*>* otherTanks;
 
     sf::RenderWindow* window_;
+
+    sf::IpAddress ipAddress_;
+    sf::UdpSocket socket_;
+    sf::Packet packetSend_;
+
 };
 
 
