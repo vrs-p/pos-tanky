@@ -43,7 +43,7 @@ private:
     sf::IpAddress ipAddress_;
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
-
+    unsigned short id_;
 };
 
 

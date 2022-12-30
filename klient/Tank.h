@@ -27,6 +27,7 @@ public:
     sf::Sprite * getSprite();
 
     int getDirection();
+    void setDirection(DIRECTION dir);
     double getSpeed() const;
     double getReloadTime();
 

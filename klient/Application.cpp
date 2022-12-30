@@ -8,6 +8,7 @@ Application::Application() {
     this->isRunning = true;
     this->packetSend_ = sf::Packet{};
     this->ipAddress_ = sf::IpAddress::LocalHost;
+    this->id_ = 0;
 }
 
 Application::~Application() {
@@ -98,12 +99,32 @@ void Application::sendData() {
         if (this->window_ != nullptr && this->clientTank_ != nullptr) {
             this->packetSend_.clear();
 
+            this->packetSend_ << this->id_;
             this->packetSend_ << this->clientTank_->getSprite()->getPosition().x;
             this->packetSend_ << this->clientTank_->getSprite()->getPosition().y;
             this->packetSend_ << this->clientTank_->getDirection();
             this->packetSend_ << this->isRunning;
             if (this->socket_.send(this->packetSend_, this->ipAddress_, 55000) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
+            }
+            if (this->id_ == 0) {
+                sf::Packet packetRecieve = sf::Packet{};
+                sf::IpAddress ipAddress = sf::IpAddress{};
+                unsigned short port;
+                float tmpX, tmpY;
+                int tmpDir, tmpID;
+                if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
+                    packetRecieve >> tmpX;
+                    packetRecieve >> tmpY;
+                    packetRecieve >> tmpDir;
+                    packetRecieve >> tmpID;
+                }
+                this->clientTank_->getSprite()->setPosition(tmpX, tmpY);
+                this->clientTank_->rotate(static_cast<DIRECTION>(tmpDir));
+                this->id_ = tmpID;
+                if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
+
+                }
             }
         }
     }

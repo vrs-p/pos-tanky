@@ -181,3 +181,6 @@ int Tank::getDirection() {
     return static_cast<int>(this->direction_);
 }
 
+void Tank::setDirection(DIRECTION dir) {
+    this->direction_ = dir;
+}
