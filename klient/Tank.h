@@ -20,6 +20,8 @@ public:
     void moveRight();
     void fire();
 
+    void rotate(DIRECTION dir);
+
     void render(sf::RenderWindow& renderer);
 
     sf::Sprite * getSprite();
