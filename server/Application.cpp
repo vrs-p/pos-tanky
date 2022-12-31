@@ -197,6 +197,7 @@ void Application::sendData() {
     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
             }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -225,6 +226,7 @@ void Application::receiveData() {
                 client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
             }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 

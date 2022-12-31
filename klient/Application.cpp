@@ -10,7 +10,7 @@ Application::Application() {
     this->ipAddress_ = sf::IpAddress("158.193.128.160");
     this->id_ = 0;
     this->clientTank_ = new Tank();
-    this->otherTanks = new std::vector<Tank*>();
+    this->otherTanks = new std::vector<Tank *>();
 }
 
 Application::~Application() {
@@ -34,7 +34,7 @@ void Application::render() {
 void Application::draw() {
     this->window_->clear();
     this->clientTank_->render(*this->window_);
-    for (Tank* tank : *this->otherTanks) {
+    for (Tank *tank: *this->otherTanks) {
         tank->render(*this->window_);
     }
 
@@ -128,13 +128,13 @@ void Application::sendData() {
             if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
-
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
 }
 
 void Application::connectToServer() {
-this->packetSend_.clear();
+    this->packetSend_.clear();
     if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
         std::cout << "Sending failed" << "\n";
     }
@@ -180,7 +180,7 @@ void Application::waitForGameSettings() {
         packetRecieve >> positionX;
         packetRecieve >> positionY;
         packetRecieve >> direction;
-        Tank* tmpTank = new Tank();
+        Tank *tmpTank = new Tank();
         tmpTank->setPlayerId(pId);
         tmpTank->getSprite()->setPosition(positionX, positionY);
         tmpTank->rotate(static_cast<DIRECTION>(direction));
@@ -216,13 +216,15 @@ void Application::receiveData() {
                 packetRecieve >> positionY;
                 packetRecieve >> direction;
 
-                for (Tank* tank : *this->otherTanks) {
+                for (Tank *tank: *this->otherTanks) {
                     if (tank->getPlayerId() == pId) {
                         tank->getSprite()->setPosition(positionX, positionY);
                         tank->rotate(static_cast<DIRECTION>(direction));
                     }
-                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << "\n";
+                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x
+                              << " Y: " << tank->getSprite()->getPosition().y << "\n";
                 }
             }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
