@@ -16,8 +16,10 @@ Application::~Application() {
 
 void Application::run() {
     if (this->isRunning) {
-        std::thread communicatingThread(&Application::communicate, this);
-        communicatingThread.join();
+        std::thread sendDataThread(&Application::sendData, this);
+        std::thread receiveData(&Application::receiveData, this);
+        sendDataThread.join();
+        receiveData.join();
     }
 }
 
@@ -176,6 +178,54 @@ void Application::initializeGame() {
         }
     }
 
+}
+
+void Application::sendData() {
+    while (true) {
+        for (Client *client: *this->clients_) {
+            this->packetSend_.clear();
+            for (Client *clientInfo: *this->clients_) {
+                if (clientInfo->getClientId() != client->getClientId()) {
+                    this->packetSend_ << clientInfo->getClientId();
+                    this->packetSend_ << clientInfo->getPosition()->xPosition_;
+                    this->packetSend_ << clientInfo->getPosition()->yPosition_;
+                    this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
+                }
+            }
+            if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_,
+                                   client->getConnetcion()->port_) == sf::Socket::Done) {
+    //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
+            }
+        }
+    }
+}
+
+void Application::receiveData() {
+    sf::Packet packetRecieve = sf::Packet{};
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+    float tmpX = 0, tmpY = 0;
+    int tmpDir, pId;
+
+    while (true) {
+        packetRecieve.clear();
+
+        if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
+            packetRecieve >> pId;
+            packetRecieve >> tmpX;
+            packetRecieve >> tmpY;
+            packetRecieve >> tmpDir;
+            packetRecieve >> this->clientReadyToPlay_;
+        }
+
+        for (Client* client : *this->clients_) {
+            if (client->getClientId() == pId) {
+                client->getPosition()->xPosition_ = tmpX;
+                client->getPosition()->yPosition_ = tmpY;
+                client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
+            }
+        }
+    }
 }
 
 

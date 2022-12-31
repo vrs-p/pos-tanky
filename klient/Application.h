@@ -32,9 +32,11 @@ public:
 
     void communicationWithServer();
 
+
     void run();
 
     void sendData();
+    void receiveData();
 
 private:
     bool isRunning;

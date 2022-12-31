@@ -4,11 +4,11 @@
 
 int main() {
     Application app;
-//    app.run();
     app.initializeSocket();
     app.waitForClients();
     app.initializeGame();
-    app.communicate();
+    app.run();
+//    app.communicate();
     return 0;
 
 }

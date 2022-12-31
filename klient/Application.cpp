@@ -91,11 +91,15 @@ void Application::initializeWindow() {
 }
 
 void Application::run() {
+    this->communicationWithServer();
+
     if (this->isRunning) {
         std::thread renderingThread(&Application::render, this);
-        std::thread sendingThread(&Application::communicationWithServer, this);
-        renderingThread.join();
+        std::thread receivingData(&Application::receiveData, this);
+        std::thread sendingThread(&Application::sendData, this);
+        receivingData.join();
         sendingThread.join();
+        renderingThread.join();
     }
 }
 
@@ -123,25 +127,6 @@ void Application::sendData() {
             packetSend << this->isRunning;
             if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
-            }
-
-            packetRecieve.clear();
-            if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done)
-//                std::cout << "Packet with game settings was recieved\n";
-
-            for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
-                packetRecieve >> pId;
-                packetRecieve >> positionX;
-                packetRecieve >> positionY;
-                packetRecieve >> direction;
-
-                for (Tank* tank : *this->otherTanks) {
-                    if (tank->getPlayerId() == pId) {
-                        tank->getSprite()->setPosition(positionX, positionY);
-                        tank->rotate(static_cast<DIRECTION>(direction));
-                    }
-                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << "\n";
-                }
             }
 
         }
@@ -209,5 +194,35 @@ void Application::waitForGameSettings() {
 void Application::communicationWithServer() {
     this->connectToServer();
     this->waitForGameSettings();
-    this->sendData();
+//    this->sendData();
+}
+
+void Application::receiveData() {
+    sf::Packet packetRecieve = sf::Packet{};
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+
+    int pId, direction;
+    float positionX, positionY;
+
+    while (this->isRunning) {
+        packetRecieve.clear();
+        if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done)
+//                std::cout << "Packet with game settings was recieved\n";
+
+            for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
+                packetRecieve >> pId;
+                packetRecieve >> positionX;
+                packetRecieve >> positionY;
+                packetRecieve >> direction;
+
+                for (Tank* tank : *this->otherTanks) {
+                    if (tank->getPlayerId() == pId) {
+                        tank->getSprite()->setPosition(positionX, positionY);
+                        tank->rotate(static_cast<DIRECTION>(direction));
+                    }
+                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << "\n";
+                }
+            }
+    }
 }

@@ -33,6 +33,9 @@ public:
     void waitForClients();
     void communicate();
 
+    void sendData();
+    void receiveData();
+
 private:
     bool isRunning;
     std::vector<Client*>* clients_;
