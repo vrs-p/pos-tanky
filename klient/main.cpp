@@ -25,6 +25,7 @@ int main(int argc, char* args[]) {
 //    std::cout << "Message was sent sucesfully" << "\n";
 
     Application app;
-    app.run();
+//    app.run();
+    app.connectToServer();
     return 0;
 }

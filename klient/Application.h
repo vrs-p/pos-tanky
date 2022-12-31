@@ -27,6 +27,7 @@ public:
     void checkBorders();
     void draw();
     void initializeWindow();
+    void connectToServer();
 
     void run();
 

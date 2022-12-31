@@ -7,7 +7,7 @@
 Application::Application() {
     this->isRunning = true;
     this->packetSend_ = sf::Packet{};
-    this->ipAddress_ = sf::IpAddress::LocalHost;
+    this->ipAddress_ = sf::IpAddress("158.193.128.160");
     this->id_ = 0;
 }
 
@@ -104,7 +104,7 @@ void Application::sendData() {
             this->packetSend_ << this->clientTank_->getSprite()->getPosition().y;
             this->packetSend_ << this->clientTank_->getDirection();
             this->packetSend_ << this->isRunning;
-            if (this->socket_.send(this->packetSend_, this->ipAddress_, 55000) != sf::Socket::Done) {
+            if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
             if (this->id_ == 0) {
@@ -128,4 +128,32 @@ void Application::sendData() {
             }
         }
     }
+}
+
+void Application::connectToServer() {
+//    if (this->socket_.bind(43333) != sf::Socket::Done) {
+//        std::cout << "Unable to bind PORT 55000" << std::endl;
+//    }
+
+
+    this->packetSend_.clear();
+    if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
+        std::cout << "Sending failed" << "\n";
+    }
+
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+    float tmpX, tmpY;
+    int tmpDir, tmpID;
+    sf::Packet packetRecieve = sf::Packet{};
+    packetRecieve.clear();
+
+    if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
+        packetRecieve >> tmpX;
+        packetRecieve >> tmpY;
+        packetRecieve >> tmpID;
+        packetRecieve >> tmpDir;
+    }
+
+    std::cout << "X: " << tmpX << " Y: " << tmpY << " ID: " << tmpID << "\n";
 }

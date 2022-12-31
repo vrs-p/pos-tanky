@@ -8,9 +8,8 @@
 #include <list>
 #include <thread>
 #include <cmath>
-#include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
-#include "Tank.h"
+#include "Client.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
@@ -21,11 +20,11 @@ public:
     ~Application();
 
 
-    void render();
-    void readClientInput();
-    void checkBorders();
-    void draw();
-    void initializeWindow();
+//    void render();
+//    void readClientInput();
+//    void checkBorders();
+//    void draw();
+//    void initializeWindow();
 
     void run();
 
@@ -35,13 +34,8 @@ public:
 
 private:
     bool isRunning;
+    std::vector<Client*>* clients_;
 
-    Tank* clientTank_;
-    std::list<Tank*>* otherTanks;
-
-    Tank* otherClientTank_;
-
-    sf::RenderWindow* window_;
 
     sf::UdpSocket socket_;
     sf::Packet packetSend_;

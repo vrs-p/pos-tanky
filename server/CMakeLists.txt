@@ -3,12 +3,8 @@ project(server)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SFML_STATIC_LIBRARIES TRUE)
-set(SFML_DIR C:/Users/filip/Desktop/POS/sfml/lib/cmake/SFML)
-find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
+find_package(SFML COMPONENTS system network REQUIRED)
 
-include_directories(C:/Users/filip/Desktop/POS/sfml/include)
+add_executable(server main.cpp Application.cpp Application.h Client.cpp Client.h)
 
-add_executable(server main.cpp)
-
-target_link_libraries(server sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
+target_link_libraries(server sfml-network pthread)
