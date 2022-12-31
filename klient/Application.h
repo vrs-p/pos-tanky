@@ -8,6 +8,8 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
+#include <condition_variable>
+#include <mutex>
 #include "Tank.h"
 
 #ifndef KLIENT_APPLICATION_H
@@ -41,6 +43,10 @@ public:
 private:
     bool isRunning;
     int numberOfPlayers_;
+    bool sendDataBool;
+    std::mutex* mutex;
+    std::condition_variable* sendDataCond;
+
 
     Tank* clientTank_;
     std::vector<Tank*>* otherTanks;

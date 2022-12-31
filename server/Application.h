@@ -9,6 +9,8 @@
 #include <thread>
 #include <cmath>
 #include <SFML/Network.hpp>
+#include <mutex>
+#include <condition_variable>
 #include "Client.h"
 
 const int SCREEN_WIDTH = 800;
@@ -19,12 +21,6 @@ public:
     Application();
     ~Application();
 
-
-//    void render();
-//    void readClientInput();
-//    void checkBorders();
-//    void draw();
-//    void initializeWindow();
 
     void run();
 
@@ -40,6 +36,9 @@ private:
     bool isRunning;
     std::vector<Client*>* clients_;
 
+    bool sendDataBool;
+    std::mutex* mutex;
+    std::condition_variable* sendDataCond;
 
     sf::UdpSocket socket_;
     sf::Packet packetSend_;

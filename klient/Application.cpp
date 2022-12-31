@@ -64,7 +64,11 @@ void Application::readClientInput() {
                 case sf::Keyboard::Space:
                     this->clientTank_->fire();
                     break;
+
             }
+            std::unique_lock<std::mutex> loc(*this->mutex);
+            this->sendDataBool = true;
+            this->sendDataCond->notify_one();
         }
     }
 }
@@ -88,11 +92,14 @@ void Application::checkBorders() {
 
 void Application::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
+    this->window_->setFramerateLimit(60);
 }
 
 void Application::run() {
+    this->sendDataBool = false;
     this->communicationWithServer();
-
+    this->mutex = new std::mutex();
+    this->sendDataCond = new std::condition_variable();
     if (this->isRunning) {
         std::thread renderingThread(&Application::render, this);
         std::thread receivingData(&Application::receiveData, this);
@@ -115,6 +122,11 @@ void Application::sendData() {
     int testInt = 234;
 
     while (this->isRunning) {
+        std::unique_lock<std::mutex> loc(*this->mutex);
+        while (!this->sendDataBool) {
+            this->sendDataCond->wait(loc);
+        }
+
         if (this->window_ != nullptr && this->clientTank_ != nullptr) {
             packetSend.clear();
             positionX = this->clientTank_->getSprite()->getPosition().x;
@@ -128,8 +140,10 @@ void Application::sendData() {
             if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
+//        std::cout << "Data were sended" << "\n";
+        this->sendDataBool = false;
     }
 }
 
@@ -225,6 +239,6 @@ void Application::receiveData() {
                               << " Y: " << tank->getSprite()->getPosition().y << "\n";
                 }
             }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }

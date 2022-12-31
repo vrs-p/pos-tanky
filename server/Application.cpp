@@ -15,6 +15,9 @@ Application::~Application() {
 
 
 void Application::run() {
+    this->sendDataBool = false;
+    this->mutex = new std::mutex();
+    this->sendDataCond = new std::condition_variable();
     if (this->isRunning) {
         std::thread sendDataThread(&Application::sendData, this);
         std::thread receiveData(&Application::receiveData, this);
@@ -182,6 +185,11 @@ void Application::initializeGame() {
 
 void Application::sendData() {
     while (true) {
+        std::unique_lock<std::mutex> loc(*this->mutex);
+        while (!this->sendDataBool) {
+            this->sendDataCond->wait(loc);
+        }
+
         for (Client *client: *this->clients_) {
             this->packetSend_.clear();
             for (Client *clientInfo: *this->clients_) {
@@ -197,7 +205,9 @@ void Application::sendData() {
     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//        std::cout << "Data were sent\n";
+        this->sendDataBool = false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
@@ -226,7 +236,11 @@ void Application::receiveData() {
                 client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::unique_lock<std::mutex> loc(*this->mutex);
+        this->sendDataBool = true;
+        this->sendDataCond->notify_one();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
