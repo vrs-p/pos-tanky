@@ -28,6 +28,7 @@ public:
 
     POSITION* getPosition();
     CONNECTION* getConnetcion();
+    int getClientId();
 
 private:
     int id_;

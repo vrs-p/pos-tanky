@@ -7,6 +7,8 @@ int main() {
 //    app.run();
     app.initializeSocket();
     app.waitForClients();
+    app.initializeGame();
+    app.communicate();
     return 0;
 
 }

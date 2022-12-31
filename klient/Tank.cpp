@@ -184,3 +184,11 @@ int Tank::getDirection() {
 void Tank::setDirection(DIRECTION dir) {
     this->direction_ = dir;
 }
+
+int Tank::getPlayerId() const {
+    return this->playerId;
+}
+
+void Tank::setPlayerId(int pId) {
+    this->playerId = pId;
+}

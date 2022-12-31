@@ -28,6 +28,9 @@ public:
     void draw();
     void initializeWindow();
     void connectToServer();
+    void waitForGameSettings();
+
+    void communicationWithServer();
 
     void run();
 
@@ -35,9 +38,10 @@ public:
 
 private:
     bool isRunning;
+    int numberOfPlayers_;
 
     Tank* clientTank_;
-    std::list<Tank*>* otherTanks;
+    std::vector<Tank*>* otherTanks;
 
     sf::RenderWindow* window_;
 

@@ -31,7 +31,12 @@ public:
     double getSpeed() const;
     double getReloadTime();
 
+    int getPlayerId() const;
+    void setPlayerId(int pId);
+
 private:
+    int playerId;
+
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
 

@@ -29,4 +29,8 @@ CONNECTION *Client::getConnetcion() {
     return this->connection_;
 }
 
+int Client::getClientId() {
+    return this->id_;
+}
+
 

@@ -29,6 +29,7 @@ public:
     void run();
 
     void initializeSocket();
+    void initializeGame();
     void waitForClients();
     void communicate();
 
