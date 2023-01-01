@@ -5,9 +5,12 @@
 #include <iostream>
 #include <list>
 #include <thread>
+#include <cmath>
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
+#include <condition_variable>
+#include <mutex>
 #include "Tank.h"
-//#include <SDL_image.h>
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
@@ -26,16 +29,34 @@ public:
     void checkBorders();
     void draw();
     void initializeWindow();
+    void connectToServer();
+    void waitForGameSettings();
+
+    void communicationWithServer();
+
 
     void run();
 
+    void sendData();
+    void receiveData();
+
 private:
     bool isRunning;
+    int numberOfPlayers_;
+    bool sendDataBool;
+    std::mutex* mutex;
+    std::condition_variable* sendDataCond;
+
 
     Tank* clientTank_;
-    std::list<Tank*>* otherTanks;
+    std::vector<Tank*>* otherTanks;
 
     sf::RenderWindow* window_;
+
+    sf::IpAddress ipAddress_;
+    sf::UdpSocket socket_;
+    sf::Packet packetSend_;
+    unsigned short id_;
 };
 
 

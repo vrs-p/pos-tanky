@@ -7,7 +7,6 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include "Bullet.h"
-//#include <SDL_image.h>
 
 
 class Tank {
@@ -21,15 +20,23 @@ public:
     void moveRight();
     void fire();
 
+    void rotate(DIRECTION dir);
+
     void render(sf::RenderWindow& renderer);
 
     sf::Sprite * getSprite();
 
-    sf::RectangleShape * getIcon();
+    int getDirection();
+    void setDirection(DIRECTION dir);
     double getSpeed() const;
     double getReloadTime();
 
+    int getPlayerId() const;
+    void setPlayerId(int pId);
+
 private:
+    int playerId;
+
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
 
