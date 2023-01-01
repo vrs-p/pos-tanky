@@ -16,6 +16,15 @@ Client::Client(int id, float xPosition, float yPosition, DIRECTION direction, un
     this->fired_ = false;
 }
 
+Client::~Client() {
+    delete this->connection_;
+    this->connection_ = nullptr;
+
+    delete this->position_;
+    this->position_ = nullptr;
+
+}
+
 void Client::updatePosition(float xPosition, float yPosition, DIRECTION direction) {
     this->position_->xPosition_ = xPosition;
     this->position_->yPosition_ = yPosition;

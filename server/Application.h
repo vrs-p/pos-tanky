@@ -31,6 +31,7 @@ public:
 
     void sendData();
     void receiveData();
+    void updateOfTanksPositions();
 
 private:
     bool isRunning;
@@ -42,7 +43,7 @@ private:
 
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
-    sf::Packet packetRecieve_;
+    sf::Packet packetReceive_;
     sf::IpAddress ipAddress_;
     unsigned short port_;
     bool clientReadyToPlay_;

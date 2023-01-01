@@ -6,6 +6,7 @@ int main() {
     Application app;
     app.initializeSocket();
     app.waitForClients();
+    app.updateOfTanksPositions();
     app.initializeGame();
     app.run();
 //    app.communicate();

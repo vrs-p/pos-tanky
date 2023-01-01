@@ -51,15 +51,17 @@ void Tank::rotate(DIRECTION dir) {
             switch (this->direction_) {
                 case DOWN:
                     this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - xSize,
-                                                                this->tankSprite_->getPosition().y - ySize));
+                                                                this->tankSprite_->getPosition().y - ySize * 4 / 3));
                     break;
                 case LEFT:
-                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + (ySize - xSize),
+                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize - xSize,
                                                                 this->tankSprite_->getPosition().y - ySize));
                     break;
                 case RIGHT:
                     this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
-                                                                this->tankSprite_->getPosition().y - (ySize - xSize)));
+                                                                this->tankSprite_->getPosition().y - ySize - xSize));
+                    break;
+                default:
                     break;
             }
             this->tankSprite_->setRotation(0);
@@ -69,14 +71,14 @@ void Tank::rotate(DIRECTION dir) {
             switch (this->direction_) {
                 case UP:
                     this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + xSize,
-                                                                this->tankSprite_->getPosition().y + ySize));
+                                                                this->tankSprite_->getPosition().y + ySize * 4 / 3));
                     break;
                 case LEFT:
                     this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize,
-                                                                this->tankSprite_->getPosition().y + (ySize - xSize)));
+                                                                this->tankSprite_->getPosition().y + ySize - xSize));
                     break;
                 case RIGHT:
-                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - (ySize - xSize),
+                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize + xSize,
                                                                 this->tankSprite_->getPosition().y + ySize));
                     break;
             }
@@ -94,7 +96,7 @@ void Tank::rotate(DIRECTION dir) {
                                                                 this->tankSprite_->getPosition().y - ySize + xSize));
                     break;
                 case RIGHT:
-                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
+                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize * 4 / 3,
                                                                 this->tankSprite_->getPosition().y + xSize));
                     break;
             }
@@ -112,7 +114,7 @@ void Tank::rotate(DIRECTION dir) {
                                                                 this->tankSprite_->getPosition().y - ySize));
                     break;
                 case LEFT:
-                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize,
+                    this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x + ySize * 4 / 3,
                                                                 this->tankSprite_->getPosition().y - xSize));
                     break;
             }

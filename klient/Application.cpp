@@ -14,6 +14,24 @@ Application::Application() {
 }
 
 Application::~Application() {
+    delete this->mutex;
+    this->mutex = nullptr;
+
+    delete this->sendDataCond;
+    this->sendDataCond = nullptr;
+
+    delete this->clientTank_;
+    this->clientTank_ = nullptr;
+
+    for (int i = this->otherTanks->size() - 1; i > 0; i--) {
+        delete this->otherTanks->at(i);
+
+    }
+    delete this->otherTanks;
+    this->otherTanks = nullptr;
+
+    delete this->window_;
+    this->window_ = nullptr;
 
 }
 
@@ -111,7 +129,7 @@ void Application::run() {
 }
 
 void Application::sendData() {
-    sf::Packet packetRecieve = sf::Packet{};
+    sf::Packet packetReceive = sf::Packet{};
     sf::Packet packetSend = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     float positionX, positionY;
@@ -160,19 +178,38 @@ void Application::connectToServer() {
     unsigned short port;
     float tmpX, tmpY;
     int tmpDir, tmpID, numberOfPlayers;
-    sf::Packet packetRecieve = sf::Packet{};
-    packetRecieve.clear();
+    sf::Packet packetReceive = sf::Packet{};
+    packetReceive.clear();
 
-    if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
-        packetRecieve >> tmpX;
-        packetRecieve >> tmpY;
-        packetRecieve >> tmpID;
-        packetRecieve >> tmpDir;
-        packetRecieve >> numberOfPlayers;
+    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+        packetReceive >> tmpX;
+        packetReceive >> tmpY;
+        packetReceive >> tmpID;
+        packetReceive >> tmpDir;
+        packetReceive >> numberOfPlayers;
+    }
+
+    switch (static_cast<DIRECTION>(tmpDir)) {
+        case UP:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x / 2;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
+            break;
+        case DOWN:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x / 2;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y / 3;
+            break;
+        case LEFT:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y * 2 / 3;
+            break;
+        case RIGHT:
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y * 2 / 3;
+            break;
     }
 
     this->clientTank_->getSprite()->setPosition(tmpX, tmpY);
     this->clientTank_->rotate(static_cast<DIRECTION>(tmpDir));
+    this->clientTank_->setDirection(static_cast<DIRECTION>(tmpDir));
     this->numberOfPlayers_ = numberOfPlayers;
     this->clientTank_->setPlayerId(tmpID);
 
@@ -180,25 +217,44 @@ void Application::connectToServer() {
 }
 
 void Application::waitForGameSettings() {
-    sf::Packet packetRecieve = sf::Packet{};
+    sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     unsigned short port;
 
     int pId, direction;
     float positionX, positionY;
 
-    packetRecieve.clear();
+    packetReceive.clear();
 
-    if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done)
-        std::cout << "Packet with game settings was recieved\n";
+    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
+        std::cout << "Packet with game settings was received\n";
 
     for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
-        packetRecieve >> pId;
-        packetRecieve >> positionX;
-        packetRecieve >> positionY;
-        packetRecieve >> direction;
+        packetReceive >> pId;
+        packetReceive >> positionX;
+        packetReceive >> positionY;
+        packetReceive >> direction;
         Tank *tmpTank = new Tank();
         tmpTank->setPlayerId(pId);
+
+        switch (static_cast<DIRECTION>(direction)) {
+            case UP:
+                break;
+            case DOWN:
+                tmpTank->setDirection(DOWN);
+                tmpTank->rotate(UP);
+                tmpTank->setDirection(DOWN);
+                break;
+            case LEFT:
+                positionX = positionX + this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
+                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
+                break;
+            case RIGHT:
+                positionX = positionX - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
+                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y + this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
+                break;
+        }
+
         tmpTank->getSprite()->setPosition(positionX, positionY);
         tmpTank->rotate(static_cast<DIRECTION>(direction));
 
@@ -210,12 +266,39 @@ void Application::waitForGameSettings() {
 
 void Application::communicationWithServer() {
     this->connectToServer();
+    this->updatePositionsOfTanks();
     this->waitForGameSettings();
 //    this->sendData();
 }
 
+void Application::updatePositionsOfTanks() {
+    sf::Packet packetReceive = sf::Packet{};
+    sf::Packet packetSend = sf::Packet{};
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+
+    float positionX, positionY;
+
+    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+        std::cout << "\n\nClient have permission to send updated position.\n";
+    }
+    packetReceive.clear();
+
+    packetSend.clear();
+    positionX = this->clientTank_->getSprite()->getPosition().x;
+    positionY = this->clientTank_->getSprite()->getPosition().y;
+
+    packetSend << this->clientTank_->getPlayerId();
+    packetSend << positionX;
+    packetSend << positionY;
+    packetSend << static_cast<int>(this->clientTank_->getDirection());
+    if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
+        std::cout << "Sending failed" << "\n";
+    }
+}
+
 void Application::receiveData() {
-    sf::Packet packetRecieve = sf::Packet{};
+    sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     unsigned short port;
 
@@ -224,16 +307,16 @@ void Application::receiveData() {
     bool fired;
 
     while (this->isRunning) {
-        packetRecieve.clear();
-        if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done)
-//                std::cout << "Packet with game settings was recieved\n";
+        packetReceive.clear();
+        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
+//                std::cout << "Packet with game settings was received\n";
 
             for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
-                packetRecieve >> pId;
-                packetRecieve >> positionX;
-                packetRecieve >> positionY;
-                packetRecieve >> direction;
-                packetRecieve >> fired;
+                packetReceive >> pId;
+                packetReceive >> positionX;
+                packetReceive >> positionY;
+                packetReceive >> direction;
+                packetReceive >> fired;
 
                 for (Tank *tank: *this->otherTanks) {
                     if (tank->getPlayerId() == pId) {

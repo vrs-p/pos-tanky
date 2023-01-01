@@ -33,7 +33,7 @@ public:
     void waitForGameSettings();
 
     void communicationWithServer();
-
+    void updatePositionsOfTanks();
 
     void run();
 
