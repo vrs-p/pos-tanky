@@ -114,12 +114,7 @@ void Application::sendData() {
     sf::Packet packetRecieve = sf::Packet{};
     sf::Packet packetSend = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
-    unsigned short port;
-
-    int pId, direction;
     float positionX, positionY;
-
-    int testInt = 234;
 
     while (this->isRunning) {
         std::unique_lock<std::mutex> loc(*this->mutex);
@@ -136,10 +131,18 @@ void Application::sendData() {
             packetSend << positionX;
             packetSend << positionY;
             packetSend << static_cast<int>(this->clientTank_->getDirection());
-            packetSend << this->isRunning;
+            packetSend << (this->clientTank_->getBullet()->wasFired() && !this->clientTank_->getBullet()->wasFiredAndSent());
+
+            if (this->clientTank_->getBullet()->wasFired() && (this->clientTank_->getBullet()->wasFiredAndSent() == false)) {
+//                std::cout << "Fired" << "\n";
+                this->clientTank_->getBullet()->setWasFiredAndSent();
+            }
+
             if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
+
+
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
 //        std::cout << "Data were sended" << "\n";
@@ -218,6 +221,7 @@ void Application::receiveData() {
 
     int pId, direction;
     float positionX, positionY;
+    bool fired;
 
     while (this->isRunning) {
         packetRecieve.clear();
@@ -229,11 +233,14 @@ void Application::receiveData() {
                 packetRecieve >> positionX;
                 packetRecieve >> positionY;
                 packetRecieve >> direction;
+                packetRecieve >> fired;
 
                 for (Tank *tank: *this->otherTanks) {
                     if (tank->getPlayerId() == pId) {
                         tank->getSprite()->setPosition(positionX, positionY);
                         tank->rotate(static_cast<DIRECTION>(direction));
+                        if (fired)
+                            tank->fire();
                     }
                     std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x
                               << " Y: " << tank->getSprite()->getPosition().y << "\n";

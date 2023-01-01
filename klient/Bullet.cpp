@@ -2,10 +2,13 @@
 // Created by filip on 28. 12. 2022.
 //
 #include "Application.h"
+//#include "Bullet.h"
+
 
 Bullet::Bullet() {
-    this->speed_ = 0.5;
+    this->speed_ = 15;
     this->fired_ = false;
+    this->firedAndSent_ = false;
     this->diameter_ = 4;
     this->bulletIcon_ = new sf::RectangleShape(sf::Vector2f(this->diameter_, this->diameter_));
 }
@@ -15,7 +18,7 @@ Bullet::~Bullet() {
     this->bulletIcon_ = nullptr;
 }
 
-void Bullet::shotBullet(int xPosition, int yPosition, DIRECTION direction) {
+void Bullet::shotBullet(float xPosition, float yPosition, DIRECTION direction) {
     switch (direction) {
         case UP:
         case DOWN:
@@ -41,6 +44,7 @@ void Bullet::render(sf::RenderWindow &window) {
         window.draw(*this->bulletIcon_);
     } else {
         this->fired_ = false;
+        this->firedAndSent_ = false;
     }
 }
 
@@ -59,3 +63,12 @@ void Bullet::moveBullet() {
 bool Bullet::wasFired() const {
     return this->fired_;
 }
+
+bool Bullet::wasFiredAndSent() const {
+    return this->firedAndSent_;
+}
+
+void Bullet::setWasFiredAndSent() {
+    this->firedAndSent_ = true;
+}
+

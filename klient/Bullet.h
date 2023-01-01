@@ -14,13 +14,16 @@ public:
     ~Bullet();
 
     bool wasFired() const;
-    void shotBullet(int xPosition, int yPosition, DIRECTION direction);
+    bool wasFiredAndSent() const;
+    void setWasFiredAndSent();
+    void shotBullet(float xPosition, float yPosition, DIRECTION direction);
     void moveBullet();
     void render(sf::RenderWindow& renderer);
 private:
     sf::RectangleShape* bulletIcon_;
     float speed_;
     bool fired_;
+    bool firedAndSent_;
     int diameter_;
     DIRECTION direction_;
 };

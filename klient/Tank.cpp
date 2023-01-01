@@ -119,29 +119,26 @@ void Tank::rotate(DIRECTION dir) {
             this->tankSprite_->setRotation(90);
             break;
     }
+    this->direction_ = dir;
 }
 
 void Tank::moveUp() {
     this->rotate(UP);
-    this->direction_ = UP;
     this->tankSprite_->move(sf::Vector2f(0, -this->speed_));
 }
 
 void Tank::moveDown() {
     this->rotate(DOWN);
-    this->direction_ = DOWN;
     this->tankSprite_->move(sf::Vector2f(0, this->speed_));
 }
 
 void Tank::moveLeft() {
     this->rotate(LEFT);
-    this->direction_ = LEFT;
     this->tankSprite_->move(sf::Vector2f(-this->speed_, 0));
 }
 
 void Tank::moveRight() {
     this->rotate(RIGHT);
-    this->direction_ = RIGHT;
     this->tankSprite_->move(sf::Vector2f(this->speed_, 0));
 }
 
@@ -191,4 +188,8 @@ int Tank::getPlayerId() const {
 
 void Tank::setPlayerId(int pId) {
     this->playerId = pId;
+}
+
+Bullet *Tank::getBullet() {
+    return this->bullet_;
 }

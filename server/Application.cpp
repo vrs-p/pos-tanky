@@ -198,6 +198,8 @@ void Application::sendData() {
                     this->packetSend_ << clientInfo->getPosition()->xPosition_;
                     this->packetSend_ << clientInfo->getPosition()->yPosition_;
                     this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
+                    this->packetSend_ << clientInfo->getFired();
+                    clientInfo->setFired(false);
                 }
             }
             if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_,
@@ -217,6 +219,7 @@ void Application::receiveData() {
     unsigned short port;
     float tmpX = 0, tmpY = 0;
     int tmpDir, pId;
+    bool pFIred;
 
     while (true) {
         packetRecieve.clear();
@@ -226,7 +229,7 @@ void Application::receiveData() {
             packetRecieve >> tmpX;
             packetRecieve >> tmpY;
             packetRecieve >> tmpDir;
-            packetRecieve >> this->clientReadyToPlay_;
+            packetRecieve >> pFIred;
         }
 
         for (Client* client : *this->clients_) {
@@ -234,6 +237,7 @@ void Application::receiveData() {
                 client->getPosition()->xPosition_ = tmpX;
                 client->getPosition()->yPosition_ = tmpY;
                 client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
+                client->setFired(pFIred);
             }
         }
         std::unique_lock<std::mutex> loc(*this->mutex);

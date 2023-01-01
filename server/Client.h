@@ -30,8 +30,12 @@ public:
     CONNECTION* getConnetcion();
     int getClientId();
 
+    bool getFired();
+    void setFired(bool fired);
+
 private:
     int id_;
+    bool fired_;
     CONNECTION* connection_;
     POSITION* position_;
 

@@ -13,6 +13,7 @@ Client::Client(int id, float xPosition, float yPosition, DIRECTION direction, un
     this->position_->direction_ = direction;
     this->connection_->port_ = port;
     this->connection_->ipAddress_ = ipAddress;
+    this->fired_ = false;
 }
 
 void Client::updatePosition(float xPosition, float yPosition, DIRECTION direction) {
@@ -31,6 +32,14 @@ CONNECTION *Client::getConnetcion() {
 
 int Client::getClientId() {
     return this->id_;
+}
+
+bool Client::getFired() {
+    return this->fired_;
+}
+
+void Client::setFired(bool fired) {
+    this->fired_ = fired;
 }
 
 

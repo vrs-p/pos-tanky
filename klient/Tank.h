@@ -34,6 +34,8 @@ public:
     int getPlayerId() const;
     void setPlayerId(int pId);
 
+    Bullet* getBullet();
+
 private:
     int playerId;
 
