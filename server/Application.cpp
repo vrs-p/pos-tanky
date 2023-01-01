@@ -10,6 +10,17 @@ Application::Application() {
 }
 
 Application::~Application() {
+    for (int i = this->clients_->size() - 1; i > 0; i--) {
+        delete this->clients_->at(i);
+    }
+    delete this->clients_;
+    this->clients_ = nullptr;
+
+    delete this->mutex;
+    this->mutex = nullptr;
+
+    delete this->sendDataCond;
+    this->sendDataCond = nullptr;
 
 }
 
@@ -20,19 +31,19 @@ void Application::run() {
     this->sendDataCond = new std::condition_variable();
     if (this->isRunning) {
         std::thread sendDataThread(&Application::sendData, this);
-        std::thread receiveData(&Application::receiveData, this);
+        std::thread receiveDataThread(&Application::receiveData, this);
         sendDataThread.join();
-        receiveData.join();
+        receiveDataThread.join();
     }
 }
 
 void Application::initializeSocket() {
     this->packetSend_ = sf::Packet{};
-    this->packetRecieve_ = sf::Packet{};
+    this->packetReceive_ = sf::Packet{};
     this->ipAddress_ = sf::IpAddress::Any;
 
     if (this->socket_.bind(13877, this->ipAddress_) != sf::Socket::Done) {
-        std::cout << "Unable to bind PORT 55000" << std::endl;
+        std::cout << "Unable to bind PORT 13877" << std::endl;
     }
 
 //    std::cout << "server\n" << "\tip: " << this->ipAddress_.toString() << std::endl << "\tport: " << this->port_ << std::endl;
@@ -60,42 +71,42 @@ void Application::waitForClients() {
         sf::IpAddress tmpIp = sf::IpAddress::Any;
         DIRECTION tmpDir;
 
-        if (this->socket_.receive(this->packetRecieve_, tmpIp, tmpPort) == sf::Socket::Done) {
+        if (this->socket_.receive(this->packetReceive_, tmpIp, tmpPort) == sf::Socket::Done) {
             std::cout << "Client was connected\n";
         }
         this->packetSend_.clear();
 
         if (count == 0) {
-            positionX = 400;
-            positionY = 1;
+            positionX = SCREEN_WIDTH / 2;
+            positionY = SCREEN_HEIGHT;
             this->packetSend_ << positionX;
             this->packetSend_ << positionY;
             this->packetSend_ << count + 1;
             this->packetSend_ << static_cast<int>(UP);
             tmpDir = UP;
         } else if (count == 1) {
-            positionX = 400;
-            positionY = 800;
+            positionX = SCREEN_WIDTH / 2;
+            positionY = 0;
             this->packetSend_ << positionX;
             this->packetSend_ << positionY;
             this->packetSend_ << count + 1;
             this->packetSend_ << static_cast<int>(DOWN);
             tmpDir = DOWN;
         } else if (count == 2) {
-            positionX = 1;
-            positionY = 400;
+            positionX = SCREEN_WIDTH;
+            positionY = SCREEN_HEIGHT / 2;
             this->packetSend_ << positionX;
             this->packetSend_ << positionY;
             this->packetSend_ << count + 1;
             this->packetSend_ << static_cast<int>(LEFT);
             tmpDir = LEFT;
         } else {
-            positionX = 800;
-            positionY = 400;
+            positionX = 0;
+            positionY = SCREEN_HEIGHT / 2;
             this->packetSend_ << positionX;
             this->packetSend_ << positionY;
             this->packetSend_ << count + 1;
-            this->packetSend_ << static_cast<int>(LEFT);
+            this->packetSend_ << static_cast<int>(RIGHT);
             tmpDir = RIGHT;
         }
 
@@ -122,7 +133,7 @@ void Application::waitForClients() {
 
 //TODO: prerobiť na list tankov
 void Application::communicate() {
-    sf::Packet packetRecieve = sf::Packet{};
+    sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     unsigned short port;
     float tmpX = 0, tmpY = 0;
@@ -131,14 +142,14 @@ void Application::communicate() {
 
     while (true) {
 
-        packetRecieve.clear();
+        packetReceive.clear();
 
-        if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
-            packetRecieve >> pId;
-            packetRecieve >> tmpX;
-            packetRecieve >> tmpY;
-            packetRecieve >> tmpDir;
-            packetRecieve >> this->clientReadyToPlay_;
+        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+            packetReceive >> pId;
+            packetReceive >> tmpX;
+            packetReceive >> tmpY;
+            packetReceive >> tmpDir;
+            packetReceive >> this->clientReadyToPlay_;
         }
 
         this->packetSend_.clear();
@@ -162,6 +173,45 @@ void Application::communicate() {
     }
 
     this->isRunning = false;
+}
+
+void Application::updateOfTanksPositions() {
+    for (Client *client: *this->clients_) {
+        sf::Packet packetSend = sf::Packet {};
+        packetSend.clear();
+        if (this->socket_.send(packetSend, client->getConnetcion()->ipAddress_,client->getConnetcion()->port_) != sf::Socket::Done) {
+            std::cout << "Sending failed" << "\n";
+        }
+    }
+
+    int count = 0;
+
+    while (count < this->clients_->size()) {
+        sf::Packet packetReceive = sf::Packet{};
+        sf::IpAddress ipAddress = sf::IpAddress::Any;
+        unsigned short port;
+        float tmpX = 0, tmpY = 0;
+        int tmpDir, pId;
+
+        packetReceive.clear();
+
+        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+            packetReceive >> pId;
+            packetReceive >> tmpX;
+            packetReceive >> tmpY;
+            packetReceive >> tmpDir;
+        }
+
+        for (Client* client : *this->clients_) {
+            if (client->getClientId() == pId) {
+                client->getPosition()->xPosition_ = tmpX;
+                client->getPosition()->yPosition_ = tmpY;
+                client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
+            }
+        }
+
+        count++;
+    }
 }
 
 void Application::initializeGame() {
@@ -214,7 +264,7 @@ void Application::sendData() {
 }
 
 void Application::receiveData() {
-    sf::Packet packetRecieve = sf::Packet{};
+    sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     unsigned short port;
     float tmpX = 0, tmpY = 0;
@@ -222,14 +272,14 @@ void Application::receiveData() {
     bool pFIred;
 
     while (true) {
-        packetRecieve.clear();
+        packetReceive.clear();
 
-        if (this->socket_.receive(packetRecieve, ipAddress, port) == sf::Socket::Done) {
-            packetRecieve >> pId;
-            packetRecieve >> tmpX;
-            packetRecieve >> tmpY;
-            packetRecieve >> tmpDir;
-            packetRecieve >> pFIred;
+        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+            packetReceive >> pId;
+            packetReceive >> tmpX;
+            packetReceive >> tmpY;
+            packetReceive >> tmpDir;
+            packetReceive >> pFIred;
         }
 
         for (Client* client : *this->clients_) {
@@ -247,26 +297,3 @@ void Application::receiveData() {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -42,7 +42,6 @@ private:
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
 
-    sf::RectangleShape* tankIcon_;
     Bullet* bullet_;
     float speed_;
     double reloadTime_;
