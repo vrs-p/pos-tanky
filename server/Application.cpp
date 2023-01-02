@@ -207,6 +207,7 @@ void Application::updateOfTanksPositions() {
                 client->getPosition()->xPosition_ = tmpX;
                 client->getPosition()->yPosition_ = tmpY;
                 client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
+                client->setInitialPosition(tmpX, tmpY, static_cast<DIRECTION>(tmpDir));
             }
         }
 
@@ -242,23 +243,34 @@ void Application::sendData() {
 
         for (Client *client: *this->clients_) {
             this->packetSend_.clear();
-            for (Client *clientInfo: *this->clients_) {
-                if (clientInfo->getClientId() != client->getClientId()) {
-                    this->packetSend_ << clientInfo->getClientId();
-                    this->packetSend_ << clientInfo->getPosition()->xPosition_;
-                    this->packetSend_ << clientInfo->getPosition()->yPosition_;
-                    this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
-                    this->packetSend_ << clientInfo->getFired();
-//                    clientInfo->setFired(false);
+            if (!client->wasKilled()) {
+                this->packetSend_ << (static_cast<int>(STATUS) + 1);
+                for (Client *clientInfo: *this->clients_) {
+                    if (clientInfo->getClientId() != client->getClientId()) {
+                        this->packetSend_ << clientInfo->getClientId();
+                        this->packetSend_ << clientInfo->getPosition()->xPosition_;
+                        this->packetSend_ << clientInfo->getPosition()->yPosition_;
+                        this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
+                        this->packetSend_ << clientInfo->getFired();
+                    }
+                }
+                if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_, client->getConnetcion()->port_) == sf::Socket::Done) {
+                    //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
+                }
+                for (Client *client: *this->clients_) client->setFired(false);
+            } else if (client->wasKilled()) {
+                client->resetPosition();
+                this->packetSend_ << (static_cast<int>(KILLED) + 1);
+                this->packetSend_ << client->getClientId();
+                this->packetSend_ << client->getPosition()->xPosition_;
+                this->packetSend_ << client->getPosition()->yPosition_;
+                this->packetSend_ << static_cast<int>(client->getPosition()->direction_);
+
+                for (Client *clientKilled: *this->clients_) {
+                    this->socket_.send(this->packetSend_, clientKilled->getConnetcion()->ipAddress_, clientKilled->getConnetcion()->port_);
                 }
             }
-            if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_,
-                                   client->getConnetcion()->port_) == sf::Socket::Done) {
-    //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
-            }
         }
-        for (Client *client: *this->clients_) client->setFired(false);
-//        std::cout << "Data were sent\n";
         this->sendDataBool = false;
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
@@ -271,24 +283,40 @@ void Application::receiveData() {
     float tmpX = 0, tmpY = 0;
     int tmpDir, pId;
     bool pFIred;
+    int messageType;
 
     while (true) {
         packetReceive.clear();
 
         if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+            packetReceive >> messageType;
+
+        }
+        messageType--;
+        if (static_cast<TYPES_MESSAGES>(messageType) == STATUS) {
             packetReceive >> pId;
             packetReceive >> tmpX;
             packetReceive >> tmpY;
             packetReceive >> tmpDir;
             packetReceive >> pFIred;
-        }
-
-        for (Client* client : *this->clients_) {
-            if (client->getClientId() == pId) {
-                client->getPosition()->xPosition_ = tmpX;
-                client->getPosition()->yPosition_ = tmpY;
-                client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
-                client->setFired(pFIred);
+            for (Client* client : *this->clients_) {
+                if (client->getClientId() == pId) {
+                    client->getPosition()->xPosition_ = tmpX;
+                    client->getPosition()->yPosition_ = tmpY;
+                    client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
+                    client->setFired(pFIred);
+                }
+            }
+        } else if (static_cast<TYPES_MESSAGES>(messageType) == KILLED) {
+            int killer;
+            packetReceive >> pId;
+            packetReceive >> killer;
+            for (Client* client : *this->clients_) {
+                if (client->getClientId() == pId) {
+                    client->killed();
+                } else if (client->getClientId() == killer) {
+                    client->increaseScore();
+                }
             }
         }
         std::unique_lock<std::mutex> loc(*this->mutex);

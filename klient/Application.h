@@ -11,13 +11,18 @@
 #include <condition_variable>
 #include <mutex>
 #include "Tank.h"
-#include "Collision.hpp"
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
+
+enum TYPES_MESSAGES {
+    STATUS,
+    KILLED,
+    END
+};
 
 class Application {
 public:
@@ -45,6 +50,8 @@ public:
 private:
     bool isRunning;
     int numberOfPlayers_;
+    bool playerWasKilled;
+    int idOfKilledPlayer;
     bool sendDataBool;
     std::mutex* mutex;
     std::condition_variable* sendDataCond;

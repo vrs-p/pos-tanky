@@ -33,12 +33,20 @@ public:
 
     bool getFired();
     void setFired(bool fired);
+    void setInitialPosition(float xPosition, float yPosition, DIRECTION direction);
+    void resetPosition();
+    void killed();
+    bool wasKilled();
+    void increaseScore();
 
 private:
     int id_;
+    int score_;
     bool fired_;
+    bool killed_;
     CONNECTION* connection_;
     POSITION* position_;
+    POSITION* initialPosition_;
 
 };
 

@@ -14,6 +14,7 @@ Client::Client(int id, float xPosition, float yPosition, DIRECTION direction, un
     this->connection_->port_ = port;
     this->connection_->ipAddress_ = ipAddress;
     this->fired_ = false;
+    this->score_ = 0;
 }
 
 Client::~Client() {
@@ -49,6 +50,32 @@ bool Client::getFired() {
 
 void Client::setFired(bool fired) {
     this->fired_ = fired;
+}
+
+void Client::setInitialPosition(float xPosition, float yPosition, DIRECTION direction) {
+    this->initialPosition_ = new POSITION();
+    this->initialPosition_->xPosition_ = xPosition;
+    this->initialPosition_->yPosition_ = yPosition;
+    this->initialPosition_->direction_ = direction;
+}
+
+void Client::killed() {
+    this->killed_ = true;
+}
+
+bool Client::wasKilled() {
+    return this->killed_;
+}
+
+void Client::resetPosition() {
+    this->position_->xPosition_ = this->initialPosition_->xPosition_;
+    this->position_->yPosition_ = this->initialPosition_->yPosition_;
+    this->position_->direction_ = this->initialPosition_->direction_;
+    this->killed_ = false;
+}
+
+void Client::increaseScore() {
+    this->score_++;
 }
 
 
