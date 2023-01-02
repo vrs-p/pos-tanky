@@ -249,7 +249,7 @@ void Application::sendData() {
                     this->packetSend_ << clientInfo->getPosition()->yPosition_;
                     this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
                     this->packetSend_ << clientInfo->getFired();
-                    clientInfo->setFired(false);
+//                    clientInfo->setFired(false);
                 }
             }
             if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_,
@@ -257,6 +257,7 @@ void Application::sendData() {
     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
             }
         }
+        for (Client *client: *this->clients_) client->setFired(false);
 //        std::cout << "Data were sent\n";
         this->sendDataBool = false;
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
