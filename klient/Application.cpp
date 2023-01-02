@@ -321,8 +321,10 @@ void Application::receiveData() {
 
                 for (Tank *tank: *this->otherTanks) {
                     if (tank->getPlayerId() == pId) {
+                        if (tank->getDirection() != direction) {
+                            tank->rotate(static_cast<DIRECTION>(direction));
+                        }
                         tank->getSprite()->setPosition(positionX, positionY);
-                        tank->rotate(static_cast<DIRECTION>(direction));
                         if (fired)
                             tank->fire();
                     }
@@ -334,24 +336,64 @@ void Application::receiveData() {
 }
 
 void Application::checkBulletCollision() {
-    float bPositionX = this->clientTank_->getBullet()->getBulletPosition().x;
-    float bPositionY = this->clientTank_->getBullet()->getBulletPosition().y;
-    float bSizeX = this->clientTank_->getBullet()->getBulletSize().x;
-    float bSizeY = this->clientTank_->getBullet()->getBulletSize().y;
+    Bullet* bullet = this->clientTank_->getBullet();
 
-    if (this->clientTank_->getBullet()->wasFired()) {
-        for (Tank* tank: *this->otherTanks) {
-            float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
-            float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
-//            if ((((bPositionX - bSizeX) >= tank->getSprite()->getPosition().x) && (bPositionX <= (tank->getSprite()->getPosition().x + tankSizeX))) &&
-//            (((bPositionY - bSizeY) >= tank->getSprite()->getPosition().y) && (bPositionY <= (tank->getSprite()->getPosition().y + tankSizeY)))) {
-//                std::cout << "Player: " << tank->getPlayerId() << " was hit X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << " Size X: " << tankSizeX << " Y: " << tankSizeY << "\n";
-//            }
-//            if (((bPositionX - bSizeX) >= tank->getSprite()->getPosition().x) && ((bPositionX + bSizeX) <= (tank->getSprite()->getPosition().x + tankSizeX))) {
-//                std::cout << "Player: " << tank->getPlayerId() << " was hit X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << " Size X: " << tankSizeX << " Y: " << tankSizeY << "\n";
-//            }
+    if (bullet != nullptr) {
+        if (bullet->wasFired()) {
+            float bulletPosX = bullet->getBulletPosition().x;
+            float bulletPosY = bullet->getBulletPosition().y;
+            float bulletSizeX = bullet->getBulletSize().x;
+            float bulletSizeY = bullet->getBulletSize().y;
 
-//            if (Collision::PixelPerfectTest(*tank->getSprite(), *this->clientTank_->getBullet()->getBulletIcon()));
+            for (Tank* tank : *this->otherTanks) {
+                float tankPosX = tank->getSprite()->getPosition().x;
+                float tankPosY = tank->getSprite()->getPosition().y;
+                float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
+                float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
+
+                if (bullet->wasFired()) {
+                    switch (tank->getDirection()) {
+                        case UP:
+                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeX &&
+                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeY) {
+                                std::cout << "Client " << tank->getPlayerId() << " was hit. (Client.getRotation()) = UP"
+                                          << std::endl;
+                                bullet->setFired(false);
+                            }
+                            break;
+
+                        case DOWN:
+                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
+                                bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
+                                std::cout << "Client " << tank->getPlayerId()
+                                          << " was hit. (Client.getRotation()) = DOWN" << std::endl;
+                                bullet->setFired(false);
+                            }
+                            break;
+
+                        case LEFT:
+                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
+                                bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
+                                std::cout << "Client " << tank->getPlayerId()
+                                          << " was hit. (Client.getRotation()) = LEFT" << std::endl;
+                                bullet->setFired(false);
+                            }
+                            break;
+
+                        case RIGHT:
+                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
+                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
+                                std::cout << "Client " << tank->getPlayerId()
+                                          << " was hit. (Client.getRotation()) = RIGHT" << std::endl;
+                                bullet->setFired(false);
+                            }
+                            break;
+                    }
+                }
+
+                //ZATIAL NAMIESTO POSIELANIA SPRAVY
+                std::cout << "Client " << tank->getPlayerId() << " was killed." << std::endl;
+            }
         }
     }
 }

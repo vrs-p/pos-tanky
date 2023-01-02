@@ -2,7 +2,7 @@
 // Created by filip on 28. 12. 2022.
 //
 #include "Application.h"
-#include "Bullet.h"
+//#include "Bullet.h"
 
 
 //#include "Bullet.h"
@@ -65,6 +65,10 @@ void Bullet::moveBullet() {
 
 bool Bullet::wasFired() const {
     return this->fired_;
+}
+
+void Bullet::setFired(bool fired) {
+    this->fired_ = fired;
 }
 
 bool Bullet::wasFiredAndSent() const {
