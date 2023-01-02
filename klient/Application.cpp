@@ -320,8 +320,10 @@ void Application::receiveData() {
 
                 for (Tank *tank: *this->otherTanks) {
                     if (tank->getPlayerId() == pId) {
+                        if (tank->getDirection() != direction) {
+                            tank->rotate(static_cast<DIRECTION>(direction));
+                        }
                         tank->getSprite()->setPosition(positionX, positionY);
-                        tank->rotate(static_cast<DIRECTION>(direction));
                         if (fired)
                             tank->fire();
                     }

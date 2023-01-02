@@ -59,7 +59,7 @@ void Tank::rotate(DIRECTION dir) {
                     break;
                 case RIGHT:
                     this->tankSprite_->setPosition(sf::Vector2f(this->tankSprite_->getPosition().x - ySize,
-                                                                this->tankSprite_->getPosition().y - ySize - xSize));
+                                                                this->tankSprite_->getPosition().y - ySize + xSize));
                     break;
                 default:
                     break;
