@@ -1,0 +1,9 @@
+# client
+klient/.idea
+klient/cmake-build-debug
+klient/cmake-build-debug-mingw
+
+# server
+server/.idea
+server/cmake-build-debug
+server/cmake-build-debug-mingw
