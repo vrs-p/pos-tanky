@@ -10,6 +10,6 @@ find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
 include_directories(C:/Users/filip/Desktop/POS/sfml/include)
 
 
-add_executable(klient main.cpp Tank.cpp Tank.h Application.cpp Application.h Bullet.h Bullet.cpp)
+add_executable(klient main.cpp Tank.cpp Tank.h Application.cpp Application.h Bullet.h Bullet.cpp Collision.hpp Collision.cpp)
 
 target_link_libraries(klient sfml-system sfml-window sfml-graphics sfml-audio sfml-network)

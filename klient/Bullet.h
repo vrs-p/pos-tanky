@@ -19,6 +19,11 @@ public:
     void shotBullet(float xPosition, float yPosition, DIRECTION direction);
     void moveBullet();
     void render(sf::RenderWindow& renderer);
+
+    sf::RectangleShape* getBulletIcon();
+
+    sf::Vector2f getBulletPosition();
+    sf::Vector2f getBulletSize();
 private:
     sf::RectangleShape* bulletIcon_;
     float speed_;

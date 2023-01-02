@@ -2,6 +2,9 @@
 // Created by filip on 28. 12. 2022.
 //
 #include "Application.h"
+#include "Bullet.h"
+
+
 //#include "Bullet.h"
 
 
@@ -70,5 +73,17 @@ bool Bullet::wasFiredAndSent() const {
 
 void Bullet::setWasFiredAndSent() {
     this->firedAndSent_ = true;
+}
+
+sf::Vector2f Bullet::getBulletPosition() {
+    return this->bulletIcon_->getPosition();
+}
+
+sf::Vector2f Bullet::getBulletSize() {
+    return this->bulletIcon_->getSize();
+}
+
+sf::RectangleShape *Bullet::getBulletIcon() {
+    return this->bulletIcon_;
 }
 

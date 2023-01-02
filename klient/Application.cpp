@@ -45,6 +45,7 @@ void Application::render() {
     while (this->isRunning) {
         this->readClientInput();
         this->checkBorders();
+        this->checkBulletCollision();
         this->draw();
     }
 }
@@ -325,10 +326,32 @@ void Application::receiveData() {
                         if (fired)
                             tank->fire();
                     }
-                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x
-                              << " Y: " << tank->getSprite()->getPosition().y << "\n";
+                    std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << "\n";
                 }
             }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+}
+
+void Application::checkBulletCollision() {
+    float bPositionX = this->clientTank_->getBullet()->getBulletPosition().x;
+    float bPositionY = this->clientTank_->getBullet()->getBulletPosition().y;
+    float bSizeX = this->clientTank_->getBullet()->getBulletSize().x;
+    float bSizeY = this->clientTank_->getBullet()->getBulletSize().y;
+
+    if (this->clientTank_->getBullet()->wasFired()) {
+        for (Tank* tank: *this->otherTanks) {
+            float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
+            float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
+//            if ((((bPositionX - bSizeX) >= tank->getSprite()->getPosition().x) && (bPositionX <= (tank->getSprite()->getPosition().x + tankSizeX))) &&
+//            (((bPositionY - bSizeY) >= tank->getSprite()->getPosition().y) && (bPositionY <= (tank->getSprite()->getPosition().y + tankSizeY)))) {
+//                std::cout << "Player: " << tank->getPlayerId() << " was hit X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << " Size X: " << tankSizeX << " Y: " << tankSizeY << "\n";
+//            }
+//            if (((bPositionX - bSizeX) >= tank->getSprite()->getPosition().x) && ((bPositionX + bSizeX) <= (tank->getSprite()->getPosition().x + tankSizeX))) {
+//                std::cout << "Player: " << tank->getPlayerId() << " was hit X: " << tank->getSprite()->getPosition().x << " Y: " << tank->getSprite()->getPosition().y << " Size X: " << tankSizeX << " Y: " << tankSizeY << "\n";
+//            }
+
+//            if (Collision::PixelPerfectTest(*tank->getSprite(), *this->clientTank_->getBullet()->getBulletIcon()));
+        }
     }
 }

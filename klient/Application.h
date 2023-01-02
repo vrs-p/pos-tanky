@@ -11,6 +11,7 @@
 #include <condition_variable>
 #include <mutex>
 #include "Tank.h"
+#include "Collision.hpp"
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
@@ -27,6 +28,7 @@ public:
     void render();
     void readClientInput();
     void checkBorders();
+    void checkBulletCollision();
     void draw();
     void initializeWindow();
     void connectToServer();
