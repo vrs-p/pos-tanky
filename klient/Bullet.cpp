@@ -5,6 +5,9 @@
 //#include "Bullet.h"
 
 
+//#include "Bullet.h"
+
+
 Bullet::Bullet() {
     this->speed_ = 15;
     this->fired_ = false;
@@ -64,11 +67,27 @@ bool Bullet::wasFired() const {
     return this->fired_;
 }
 
+void Bullet::setFired(bool fired) {
+    this->fired_ = fired;
+}
+
 bool Bullet::wasFiredAndSent() const {
     return this->firedAndSent_;
 }
 
 void Bullet::setWasFiredAndSent() {
     this->firedAndSent_ = true;
+}
+
+sf::Vector2f Bullet::getBulletPosition() {
+    return this->bulletIcon_->getPosition();
+}
+
+sf::Vector2f Bullet::getBulletSize() {
+    return this->bulletIcon_->getSize();
+}
+
+sf::RectangleShape *Bullet::getBulletIcon() {
+    return this->bulletIcon_;
 }
 

@@ -18,6 +18,12 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
+enum TYPES_MESSAGES {
+    STATUS,
+    KILLED,
+    END
+};
+
 class Application {
 public:
     Application();
@@ -27,6 +33,7 @@ public:
     void render();
     void readClientInput();
     void checkBorders();
+    void checkBulletCollision();
     void draw();
     void initializeWindow();
     void connectToServer();
@@ -43,6 +50,8 @@ public:
 private:
     bool isRunning;
     int numberOfPlayers_;
+    bool playerWasKilled;
+    int idOfKilledPlayer;
     bool sendDataBool;
     std::mutex* mutex;
     std::condition_variable* sendDataCond;
