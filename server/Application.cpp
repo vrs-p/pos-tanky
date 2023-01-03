@@ -257,7 +257,6 @@ void Application::sendData() {
                 if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_, client->getConnetcion()->port_) == sf::Socket::Done) {
                     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
                 }
-                for (Client *client: *this->clients_) client->setFired(false);
             } else if (client->wasKilled()) {
                 client->resetPosition();
                 this->packetSend_ << (static_cast<int>(KILLED) + 1);
@@ -271,6 +270,7 @@ void Application::sendData() {
                 }
             }
         }
+        for (Client *client: *this->clients_) client->setFired(false);
         this->sendDataBool = false;
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
