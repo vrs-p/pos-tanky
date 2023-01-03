@@ -78,4 +78,12 @@ void Client::increaseScore() {
     this->score_++;
 }
 
+void Client::setKilledBy(int pId) {
+    this->killedBy_ = pId;
+}
+
+int Client::getKilledBy() {
+    return this->killedBy_;
+}
+
 

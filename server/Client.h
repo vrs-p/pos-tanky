@@ -38,10 +38,13 @@ public:
     void killed();
     bool wasKilled();
     void increaseScore();
+    void setKilledBy(int pId);
+    int getKilledBy();
 
 private:
     int id_;
     int score_;
+    int killedBy_;
     bool fired_;
     bool killed_;
     CONNECTION* connection_;

@@ -264,6 +264,7 @@ void Application::sendData() {
                 this->packetSend_ << client->getPosition()->xPosition_;
                 this->packetSend_ << client->getPosition()->yPosition_;
                 this->packetSend_ << static_cast<int>(client->getPosition()->direction_);
+                this->packetSend_ << client->getKilledBy();
 
                 for (Client *clientKilled: *this->clients_) {
                     this->socket_.send(this->packetSend_, clientKilled->getConnetcion()->ipAddress_, clientKilled->getConnetcion()->port_);
@@ -284,6 +285,7 @@ void Application::receiveData() {
     int tmpDir, pId;
     bool pFIred;
     int messageType;
+    int killer;
 
     while (true) {
         packetReceive.clear();
@@ -308,12 +310,13 @@ void Application::receiveData() {
                 }
             }
         } else if (static_cast<TYPES_MESSAGES>(messageType) == KILLED) {
-            int killer;
             packetReceive >> pId;
             packetReceive >> killer;
+            std::cout << "Killer: " << killer;
             for (Client* client : *this->clients_) {
                 if (client->getClientId() == pId) {
                     client->killed();
+                    client->setKilledBy(killer);
                 } else if (client->getClientId() == killer) {
                     client->increaseScore();
                 }

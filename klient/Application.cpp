@@ -148,7 +148,8 @@ void Application::sendData() {
             if (this->playerWasKilled) {
                 packetSend << (static_cast<int>(KILLED) + 1);
                 packetSend << this->idOfKilledPlayer;
-                packetSend << this->id_;
+                packetSend << this->clientTank_->getPlayerId();
+                std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer << "\n";
                 this->playerWasKilled = false;
             } else if (this->isRunning) {
                 positionX = this->clientTank_->getSprite()->getPosition().x;
@@ -333,7 +334,7 @@ void Application::receiveData() {
     int pId, direction;
     float positionX, positionY;
     bool fired;
-    int messageType;
+    int messageType, killerId;
 
     while (this->isRunning) {
         packetReceive.clear();
@@ -367,20 +368,30 @@ void Application::receiveData() {
                 packetReceive >> positionX;
                 packetReceive >> positionY;
                 packetReceive >> direction;
+                packetReceive >> killerId;
 
-                std::cout << "Killed player: " << pId;
+                std::cout << "Killed player: " << pId << "Killer is: " << killerId;
 
                 if (pId == this->id_) {
+                    this->clientTank_->getBullet()->setFired(false);
                     this->clientTank_->getSprite()->setPosition(positionX, positionY);
                     this->clientTank_->rotate(static_cast<DIRECTION>(direction));
+
+
                 } else {
                     for(Tank* tank: *this->otherTanks) {
                         if (tank->getPlayerId() == pId) {
+                            tank->getBullet()->setFired(false);
                             if (tank->getDirection() != direction) {
                                 tank->rotate(static_cast<DIRECTION>(direction));
                             }
                             tank->getSprite()->setPosition(positionX, positionY);
                         }
+                    }
+                }
+                for(Tank* tank: *this->otherTanks) {
+                    if (tank->getPlayerId() == killerId) {
+                        tank->getBullet()->setFired(false);
                     }
                 }
             }
