@@ -7,6 +7,7 @@
 Tank::Tank() {
     this->speed_ = 5.0;
     this->reloadTime_ = 3;
+    this->left_ = false;
 
     this->tankTexture_ = new sf::Texture();
     this->tankSprite_ = new sf::Sprite();
@@ -194,4 +195,28 @@ void Tank::setPlayerId(int pId) {
 
 Bullet *Tank::getBullet() {
     return this->bullet_;
+}
+
+void Tank::setLeft(bool left) {
+    this->left_ = left;
+}
+
+bool Tank::getLeft() {
+    return this->left_;
+}
+
+void Tank::setScore(int score) {
+    this->score_ = score;
+}
+
+int Tank::getScore() {
+    return this->score_;
+}
+
+void Tank::lockMutex() {
+    this->mutex.lock();
+}
+
+void Tank::unlockMutex() {
+    this->mutex.unlock();
 }

@@ -21,7 +21,8 @@ const int SCREEN_HEIGHT = 800;
 enum TYPES_MESSAGES {
     STATUS,
     KILLED,
-    END
+    END,
+    PLAYER_QUIT
 };
 
 class Application {
@@ -46,6 +47,8 @@ public:
 
     void sendData();
     void receiveData();
+
+    void printScore();
 
 private:
     bool isRunning;

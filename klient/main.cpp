@@ -9,6 +9,7 @@
 int main(int argc, char* args[]) {
     Application app;
     app.run();
+    app.printScore();
 //    app.connectToServer();
 //    app.waitForGameSettings();
 //    app.sendData();

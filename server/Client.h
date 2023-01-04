@@ -40,13 +40,20 @@ public:
     void increaseScore();
     void setKilledBy(int pId);
     int getKilledBy();
+    bool getLeft();
+    void setLeft(bool left);
+    bool wasScoreSent();
+    bool setScoreWasSent(bool sent);
+    int getScore();
 
 private:
     int id_;
     int score_;
     int killedBy_;
+    bool left_;
     bool fired_;
     bool killed_;
+    bool scoreWasSent_;
     CONNECTION* connection_;
     POSITION* position_;
     POSITION* initialPosition_;
