@@ -49,13 +49,15 @@ void Application::render() {
         this->checkBulletCollision();
         this->draw();
     }
+    std::cout << "End of rendering data\n";
 }
 
 void Application::draw() {
     this->window_->clear();
     this->clientTank_->render(*this->window_);
     for (Tank *tank: *this->otherTanks) {
-        tank->render(*this->window_);
+        if (!tank->getLeft())
+            tank->render(*this->window_);
     }
 
     this->window_->display();
@@ -84,6 +86,9 @@ void Application::readClientInput() {
                 case sf::Keyboard::Space:
                     this->clientTank_->fire();
                     break;
+                case sf::Keyboard::Q:
+                case sf::Keyboard::Escape:
+                    this->clientTank_->setLeft(true);
 
             }
             std::unique_lock<std::mutex> loc(*this->mutex);
@@ -135,8 +140,9 @@ void Application::sendData() {
     sf::Packet packetSend = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     float positionX, positionY;
+    bool continueWithSending = true;
 
-    while (this->isRunning) {
+    while (continueWithSending) {
         std::unique_lock<std::mutex> loc(*this->mutex);
         while (!this->sendDataBool) {
             this->sendDataCond->wait(loc);
@@ -145,7 +151,11 @@ void Application::sendData() {
         if (this->window_ != nullptr && this->clientTank_ != nullptr) {
             packetSend.clear();
 
-            if (this->playerWasKilled) {
+            if (this->clientTank_->getLeft()) {
+                packetSend << (static_cast<int>(END) + 1);
+                packetSend << this->clientTank_->getPlayerId();
+                continueWithSending = false;
+            } else if (this->playerWasKilled) {
                 packetSend << (static_cast<int>(KILLED) + 1);
                 packetSend << this->idOfKilledPlayer;
                 packetSend << this->clientTank_->getPlayerId();
@@ -179,6 +189,7 @@ void Application::sendData() {
 //        std::cout << "Data were sended" << "\n";
         this->sendDataBool = false;
     }
+    std::cout << "End of sending data\n";
 }
 
 void Application::connectToServer() {
@@ -297,7 +308,6 @@ void Application::communicationWithServer() {
     this->connectToServer();
     this->updatePositionsOfTanks();
     this->waitForGameSettings();
-//    this->sendData();
 }
 
 void Application::updatePositionsOfTanks() {
@@ -334,7 +344,7 @@ void Application::receiveData() {
     int pId, direction;
     float positionX, positionY;
     bool fired;
-    int messageType, killerId;
+    int messageType, killerId, score;
 
     while (this->isRunning) {
         packetReceive.clear();
@@ -394,10 +404,33 @@ void Application::receiveData() {
                         tank->getBullet()->setFired(false);
                     }
                 }
+            } else if (static_cast<TYPES_MESSAGES>(messageType) == END) {
+                std::cout << "Client got final message\n";
+                for (int i = 0; i < this->numberOfPlayers_; ++i) {
+                    packetReceive >> pId;
+                    packetReceive >> score;
+                    if (this->clientTank_->getPlayerId() == pId) {
+                        this->clientTank_->setScore(score);
+                    } else {
+                        for (Tank* tank: *this->otherTanks) {
+                            if (tank->getPlayerId() == pId)
+                                tank->setScore(score);
+                        }
+                    }
+                }
+                this->isRunning = false;
+            } else if (static_cast<TYPES_MESSAGES>(messageType) == PLAYER_QUIT) {
+                packetReceive >> pId;
+                for(Tank* tank: *this->otherTanks) {
+                    if (tank->getPlayerId() == pId) {
+                        tank->setLeft(true);
+                    }
+                }
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
+    std::cout << "End of receiving data\n";
 }
 
 void Application::checkBulletCollision() {
@@ -477,5 +510,12 @@ void Application::checkBulletCollision() {
                 }
             }
         }
+    }
+}
+
+void Application::printScore() {
+    std::cout << "Your score is: " << this->clientTank_->getScore() << "\n";
+    for (Tank* tank: *this->otherTanks) {
+        std::cout << "Player: " << tank->getPlayerId() << " Score: " << tank->getScore() << "\n";
     }
 }

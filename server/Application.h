@@ -19,7 +19,8 @@ const int SCREEN_HEIGHT = 800;
 enum TYPES_MESSAGES {
     STATUS,
     KILLED,
-    END
+    END,
+    PLAYER_QUIT
 };
 
 class Application {
@@ -41,6 +42,7 @@ public:
 
 private:
     bool isRunning;
+    int numberOfLeftPlayers;
     std::vector<Client*>* clients_;
 
     bool sendDataBool;

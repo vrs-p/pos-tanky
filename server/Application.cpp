@@ -6,6 +6,7 @@
 
 Application::Application() {
     this->isRunning = true;
+    this->numberOfLeftPlayers = 0;
     this->clients_ = new std::vector<Client *>();
 }
 
@@ -121,58 +122,6 @@ void Application::waitForClients() {
             std::cout << "Data with his status were sent\n";
         }
     }
-
-//    std::cout << "client\n" << "\tip: " << this->ipAddress_.toString() << std::endl << "\tport: " << this->port_ << std::endl;
-//
-//    if (this->clientReadyToPlay_) {
-//        this->otherClientTank_ = new Tank();
-//        this->otherClientTank_->getSprite()->setPosition(sf::Vector2f(tmpX, tmpY));
-//        this->otherClientTank_->setDirection(static_cast<DIRECTION>(tmpDir));
-//    }
-}
-
-//TODO: prerobiť na list tankov
-void Application::communicate() {
-    sf::Packet packetReceive = sf::Packet{};
-    sf::IpAddress ipAddress = sf::IpAddress::Any;
-    unsigned short port;
-    float tmpX = 0, tmpY = 0;
-    int tmpDir, pId;
-    int testInt = 0;
-
-    while (true) {
-
-        packetReceive.clear();
-
-        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
-            packetReceive >> pId;
-            packetReceive >> tmpX;
-            packetReceive >> tmpY;
-            packetReceive >> tmpDir;
-            packetReceive >> this->clientReadyToPlay_;
-        }
-
-        this->packetSend_.clear();
-        for (Client *clientInfo: *this->clients_) {
-            if (clientInfo->getClientId() != pId) {
-                this->packetSend_ << clientInfo->getClientId();
-                this->packetSend_ << clientInfo->getPosition()->xPosition_;
-                this->packetSend_ << clientInfo->getPosition()->yPosition_;
-                this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
-            }
-            if (clientInfo->getClientId() == pId) {
-                clientInfo->getPosition()->xPosition_ = tmpX;
-                clientInfo->getPosition()->yPosition_ = tmpY;
-                clientInfo->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
-            }
-//            std::cout << "Client: " << clientInfo->getClientId() << " --> X: " << clientInfo->getPosition()->xPosition_ << " Y: " << clientInfo->getPosition()->yPosition_ << "\n";
-        }
-        if (this->socket_.send(this->packetSend_, ipAddress, port) == sf::Socket::Done) {
-//            std::cout << "Data were sent to client to client with ID: " << pId << "\n";
-        }
-    }
-
-    this->isRunning = false;
 }
 
 void Application::updateOfTanksPositions() {
@@ -235,7 +184,7 @@ void Application::initializeGame() {
 }
 
 void Application::sendData() {
-    while (true) {
+    while (this->isRunning) {
         std::unique_lock<std::mutex> loc(*this->mutex);
         while (!this->sendDataBool) {
             this->sendDataCond->wait(loc);
@@ -243,7 +192,7 @@ void Application::sendData() {
 
         for (Client *client: *this->clients_) {
             this->packetSend_.clear();
-            if (!client->wasKilled()) {
+            if (!client->wasKilled() && !client->getLeft()) {
                 this->packetSend_ << (static_cast<int>(STATUS) + 1);
                 for (Client *clientInfo: *this->clients_) {
                     if (clientInfo->getClientId() != client->getClientId()) {
@@ -257,7 +206,7 @@ void Application::sendData() {
                 if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_, client->getConnetcion()->port_) == sf::Socket::Done) {
                     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
                 }
-            } else if (client->wasKilled()) {
+            } else if (client->wasKilled() && !client->getLeft()) {
                 client->resetPosition();
                 this->packetSend_ << (static_cast<int>(KILLED) + 1);
                 this->packetSend_ << client->getClientId();
@@ -269,6 +218,22 @@ void Application::sendData() {
                 for (Client *clientKilled: *this->clients_) {
                     this->socket_.send(this->packetSend_, clientKilled->getConnetcion()->ipAddress_, clientKilled->getConnetcion()->port_);
                 }
+            } else if (client->getLeft() && !client->wasScoreSent()) {
+                std::cout << "Client " << client->getClientId() << " left\n";
+                this->packetSend_ << (static_cast<int>(PLAYER_QUIT) + 1);
+                this->packetSend_ << client->getClientId();
+                for (Client *clientInform: *this->clients_) {
+                    this->socket_.send(this->packetSend_, clientInform->getConnetcion()->ipAddress_, clientInform->getConnetcion()->port_);
+                }
+
+                client->setScoreWasSent(true);
+                this->packetSend_.clear();
+                this->packetSend_ << (static_cast<int>(END) + 1);
+                for (Client *clientScore: *this->clients_) {
+                    this->packetSend_ << clientScore->getClientId();
+                    this->packetSend_ << clientScore->getScore();
+                }
+                this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_, client->getConnetcion()->port_);
             }
         }
         for (Client *client: *this->clients_) client->setFired(false);
@@ -287,7 +252,7 @@ void Application::receiveData() {
     int messageType;
     int killer;
 
-    while (true) {
+    while (this->isRunning) {
         packetReceive.clear();
 
         if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
@@ -320,6 +285,16 @@ void Application::receiveData() {
                 } else if (client->getClientId() == killer) {
                     client->increaseScore();
                 }
+            }
+        } else if (static_cast<TYPES_MESSAGES>(messageType) == END) {
+            packetReceive >> pId;
+            for (Client* client : *this->clients_) {
+                if (client->getClientId() == pId)
+                    client->setLeft(true);
+            }
+            this->numberOfLeftPlayers++;
+            if (this->clients_->size() == numberOfLeftPlayers) {
+                this->isRunning = false;
             }
         }
         std::unique_lock<std::mutex> loc(*this->mutex);

@@ -15,6 +15,8 @@ Client::Client(int id, float xPosition, float yPosition, DIRECTION direction, un
     this->connection_->ipAddress_ = ipAddress;
     this->fired_ = false;
     this->score_ = 0;
+    this->left_ = false;
+    this->scoreWasSent_ = false;
 }
 
 Client::~Client() {
@@ -84,6 +86,26 @@ void Client::setKilledBy(int pId) {
 
 int Client::getKilledBy() {
     return this->killedBy_;
+}
+
+bool Client::getLeft() {
+    return this->left_;
+}
+
+void Client::setLeft(bool left) {
+    this->left_ = left;
+}
+
+bool Client::wasScoreSent() {
+    return this->scoreWasSent_;
+}
+
+bool Client::setScoreWasSent(bool sent) {
+    return this->scoreWasSent_ = sent;
+}
+
+int Client::getScore() {
+    return this->score_;
 }
 
 

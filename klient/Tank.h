@@ -33,11 +33,18 @@ public:
 
     int getPlayerId() const;
     void setPlayerId(int pId);
+    void setLeft(bool left);
+    bool getLeft();
+
+    void setScore(int score);
+    int getScore();
 
     Bullet* getBullet();
 
 private:
     int playerId;
+    bool left_;
+    int score_;
 
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
