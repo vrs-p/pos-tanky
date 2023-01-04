@@ -24,7 +24,7 @@ Application::~Application() {
     delete this->clientTank_;
     this->clientTank_ = nullptr;
 
-    for (int i = this->otherTanks->size() - 1; i > 0; i--) {
+    for (int i = this->otherTanks->size() - 1; i >= 0; i--) {
         delete this->otherTanks->at(i);
 
     }
