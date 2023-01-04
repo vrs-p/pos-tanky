@@ -67,8 +67,10 @@ void Application::readClientInput() {
     sf::Event event;
     while (this->window_->pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            this->isRunning = false;
-            this->window_->close();
+            this->clientTank_->setLeft(true);
+            std::unique_lock<std::mutex> loc(*this->mutex);
+            this->sendDataBool = true;
+            this->sendDataCond->notify_one();
         } else if (event.type == sf::Event::KeyPressed) {
             switch (event.key.code) {
                 case sf::Keyboard::Up:
