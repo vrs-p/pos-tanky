@@ -11,7 +11,7 @@ Application::Application() {
 }
 
 Application::~Application() {
-    for (int i = this->clients_->size() - 1; i > 0; i--) {
+    for (int i = this->clients_->size() - 1; i >= 0; i--) {
         delete this->clients_->at(i);
     }
     delete this->clients_;

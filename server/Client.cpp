@@ -26,6 +26,8 @@ Client::~Client() {
     delete this->position_;
     this->position_ = nullptr;
 
+    delete this->initialPosition_;
+    this->initialPosition_ = nullptr;
 }
 
 void Client::updatePosition(float xPosition, float yPosition, DIRECTION direction) {
