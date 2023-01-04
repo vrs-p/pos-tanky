@@ -212,3 +212,11 @@ void Tank::setScore(int score) {
 int Tank::getScore() {
     return this->score_;
 }
+
+void Tank::lockMutex() {
+    this->mutex.lock();
+}
+
+void Tank::unlockMutex() {
+    this->mutex.unlock();
+}

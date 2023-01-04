@@ -6,6 +6,7 @@
 #define KLIENT_TANK_H
 #include <SFML/Graphics.hpp>
 #include <chrono>
+#include <mutex>
 #include "Bullet.h"
 
 
@@ -39,6 +40,9 @@ public:
     void setScore(int score);
     int getScore();
 
+    void lockMutex();
+    void unlockMutex();
+
     Bullet* getBullet();
 
 private:
@@ -48,6 +52,7 @@ private:
 
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
+    std::mutex mutex;
 
     Bullet* bullet_;
     float speed_;

@@ -54,8 +54,10 @@ void Application::draw() {
     this->window_->clear();
     this->clientTank_->render(*this->window_);
     for (Tank *tank: *this->otherTanks) {
+        tank->lockMutex();
         if (!tank->getLeft())
             tank->render(*this->window_);
+        tank->unlockMutex();
     }
 
     this->window_->display();
@@ -360,6 +362,7 @@ void Application::receiveData() {
                     packetReceive >> fired;
 
                     for (Tank *tank: *this->otherTanks) {
+                        tank->lockMutex();
                         if (tank->getPlayerId() == pId) {
                             if (tank->getDirection() != direction) {
                                 tank->rotate(static_cast<DIRECTION>(direction));
@@ -368,6 +371,7 @@ void Application::receiveData() {
                             if (fired)
                                 tank->fire();
                         }
+                        tank->unlockMutex();
                         std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x
                                   << " Y: " << tank->getSprite()->getPosition().y << "\n";
                     }
@@ -389,6 +393,7 @@ void Application::receiveData() {
 
                 } else {
                     for(Tank* tank: *this->otherTanks) {
+                        tank->lockMutex();
                         if (tank->getPlayerId() == pId) {
                             tank->getBullet()->setFired(false);
                             if (tank->getDirection() != direction) {
@@ -396,6 +401,7 @@ void Application::receiveData() {
                             }
                             tank->getSprite()->setPosition(positionX, positionY);
                         }
+                        tank->unlockMutex();
                     }
                 }
                 for(Tank* tank: *this->otherTanks) {
@@ -421,9 +427,11 @@ void Application::receiveData() {
             } else if (static_cast<TYPES_MESSAGES>(messageType) == PLAYER_QUIT) {
                 packetReceive >> pId;
                 for(Tank* tank: *this->otherTanks) {
+                    tank->lockMutex();
                     if (tank->getPlayerId() == pId) {
                         tank->setLeft(true);
                     }
+                    tank->unlockMutex();
                 }
             }
         }
