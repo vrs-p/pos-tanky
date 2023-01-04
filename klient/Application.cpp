@@ -38,10 +38,6 @@ Application::~Application() {
 
 void Application::render() {
     this->initializeWindow();
-//    this->clientTank_ = new Tank();
-//    float positionX = (SCREEN_WIDTH - this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x) / 2;
-//    float positionY = (SCREEN_HEIGHT - this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y);
-//    this->clientTank_->getSprite()->setPosition(positionX, positionY);
 
     while (this->isRunning) {
         this->readClientInput();
@@ -49,6 +45,8 @@ void Application::render() {
         this->checkBulletCollision();
         this->draw();
     }
+    this->window_->setActive(false);
+    this->window_->close();
     std::cout << "End of rendering data\n";
 }
 
@@ -118,6 +116,7 @@ void Application::checkBorders() {
 void Application::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
     this->window_->setFramerateLimit(60);
+    this->window_->setActive(true);
 }
 
 void Application::run() {
