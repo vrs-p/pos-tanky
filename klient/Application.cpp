@@ -239,6 +239,23 @@ void Application::connectToServer() {
             break;
     }
 
+    switch (tmpID) {
+        case 2:
+            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 0, 192));
+            break;
+
+        case 3:
+            this->clientTank_->getSprite()->setColor(sf::Color(255, 0, 0, 192));
+            break;
+
+        case 4:
+            this->clientTank_->getSprite()->setColor(sf::Color(0, 0, 255, 192));
+            break;
+
+        default:
+            break;
+    }
+
     this->clientTank_->getSprite()->setPosition(tmpX, tmpY);
     this->clientTank_->rotate(static_cast<DIRECTION>(tmpDir));
     this->clientTank_->setDirection(static_cast<DIRECTION>(tmpDir));
@@ -293,6 +310,20 @@ void Application::waitForGameSettings() {
                                         this->clientTank_->getSprite()->getScale().y +
                             this->clientTank_->getSprite()->getTexture()->getSize().x *
                             this->clientTank_->getSprite()->getScale().x;
+                break;
+        }
+
+        switch (tmpTank->getPlayerId()) {
+            case 2:
+                tmpTank->getSprite()->setColor(sf::Color(0, 255, 0, 192));
+                break;
+
+            case 3:
+                tmpTank->getSprite()->setColor(sf::Color(255, 0, 0, 192));
+                break;
+
+            case 4:
+                tmpTank->getSprite()->setColor(sf::Color(0, 0, 255, 192));
                 break;
         }
 
