@@ -251,7 +251,7 @@ void Application::connectToServer() {
             break;
 
         case 4:
-            this->clientTank_->getSprite()->setColor(sf::Color(0, 0, 255, 192));
+            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 255, 192));
             break;
 
         default:
@@ -325,7 +325,7 @@ void Application::waitForGameSettings() {
                 break;
 
             case 4:
-                tmpTank->getSprite()->setColor(sf::Color(0, 0, 255, 192));
+                tmpTank->getSprite()->setColor(sf::Color(0, 255, 255, 192));
                 break;
         }
 
@@ -554,8 +554,62 @@ void Application::checkBulletCollision() {
 }
 
 void Application::printScore() {
-    std::cout << "Your score is: " << this->clientTank_->getScore() << "\n";
+    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
+    window.setFramerateLimit(60);
+    window.setActive(true);
+    bool showScore = true;
+    sf::Font font;
+    font.loadFromFile("../font/consola.ttf");
+    sf::Text textGame;
+    textGame.setFont(font);
+    textGame.setCharacterSize(32);
+    textGame.setFillColor(sf::Color::White);
+    textGame.setString("POS-Tanks");
+    textGame.setPosition(sf::Vector2f((SCREEN_WIDTH - textGame.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 - textGame.getLocalBounds().height * 11));
+    sf::Text textEndGame;
+    textEndGame.setFont(font);
+    textEndGame.setCharacterSize(24);
+    textEndGame.setFillColor(sf::Color::White);
+    textEndGame.setString("Game Over");
+    textEndGame.setPosition(sf::Vector2f((SCREEN_WIDTH - textEndGame.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 - textGame.getLocalBounds().height * 9));
+    sf::Text textYourScore;
+    textYourScore.setFont(font);
+    textYourScore.setCharacterSize(32);
+    textYourScore.setFillColor(sf::Color::White);
+    textYourScore.setString("Your score is: " + std::to_string(this->clientTank_->getScore()));
+    textYourScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textYourScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2));
+    sf::Text textOthersScore;
+    textOthersScore.setFont(font);
+    textOthersScore.setCharacterSize(32);
+    textOthersScore.setFillColor(sf::Color::White);
+    std::string stringOthersScore;
     for (Tank* tank: *this->otherTanks) {
-        std::cout << "Player: " << tank->getPlayerId() << " Score: " << tank->getScore() << "\n";
+        stringOthersScore.append("Score of player " + std::to_string(tank->getPlayerId()) + " is: " + std::to_string(tank->getScore()) + "\n");
     }
+    textOthersScore.setString(stringOthersScore);
+    textOthersScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textOthersScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 + textYourScore.getLocalBounds().height * 2));
+
+    while (showScore) {
+        window.clear();
+        window.draw(textGame);
+        window.draw(textEndGame);
+        window.draw(textYourScore);
+        window.draw(textOthersScore);
+        window.display();
+
+        sf::Event event;
+        while (this->window_->pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                showScore = false;
+            }
+        }
+    }
+
+    window.setActive(false);
+    window.close();
+//
+//    std::cout << "Your score is: " << this->clientTank_->getScore() << "\n";
+//    for (Tank* tank: *this->otherTanks) {
+//        std::cout << "Player: " << tank->getPlayerId() << " Score: " << tank->getScore() << "\n";
+//    }
 }
