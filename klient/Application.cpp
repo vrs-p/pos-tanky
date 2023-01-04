@@ -387,8 +387,8 @@ void Application::receiveData() {
 
                 if (pId == this->id_) {
                     this->clientTank_->getBullet()->setFired(false);
-                    this->clientTank_->getSprite()->setPosition(positionX, positionY);
                     this->clientTank_->rotate(static_cast<DIRECTION>(direction));
+                    this->clientTank_->getSprite()->setPosition(positionX, positionY);
 
 
                 } else {
