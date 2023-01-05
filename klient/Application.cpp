@@ -555,9 +555,7 @@ void Application::checkBulletCollision() {
 }
 
 void Application::printScore() {
-    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
-    window.setFramerateLimit(60);
-    window.setActive(true);
+    this->initializeWindow();
     bool showScore = true;
     sf::Font font;
     font.loadFromFile("../font/consola.ttf");
@@ -590,12 +588,12 @@ void Application::printScore() {
     textOthersScore.setString(stringOthersScore);
     textOthersScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textOthersScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 + textYourScore.getLocalBounds().height * 2));
 
-    window.clear();
-    window.draw(textGame);
-    window.draw(textEndGame);
-    window.draw(textYourScore);
-    window.draw(textOthersScore);
-    window.display();
+    this->window_->clear();
+    this->window_->draw(textGame);
+    this->window_->draw(textEndGame);
+    this->window_->draw(textYourScore);
+    this->window_->draw(textOthersScore);
+    this->window_->display();
 
     while (showScore) {
         sf::Event event;
@@ -606,11 +604,6 @@ void Application::printScore() {
         }
     }
 
-    window.setActive(false);
-    window.close();
-//
-//    std::cout << "Your score is: " << this->clientTank_->getScore() << "\n";
-//    for (Tank* tank: *this->otherTanks) {
-//        std::cout << "Player: " << tank->getPlayerId() << " Score: " << tank->getScore() << "\n";
-//    }
+    this->window_->setActive(false);
+    this->window_->close();
 }
