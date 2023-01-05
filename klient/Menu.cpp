@@ -35,12 +35,6 @@ Menu::Menu() {
     this->portText_.setString("Enter port:");
     this->portText_.setPosition(xPosition, SCREEN_HEIGHT / 2 - this->portText_.getLocalBounds().height * 4);
 
-    this->continueText_.setFont(this->font_);
-    this->continueText_.setCharacterSize(32);
-    this->continueText_.setFillColor(sf::Color::White);
-    this->continueText_.setString("Press ENTER to join");
-    this->continueText_.setPosition(sf::Vector2f((SCREEN_WIDTH - this->continueText_.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 - this->continueText_.getLocalBounds().height * 1));
-
     this->textboxes_ = new std::vector<Textbox*>();
     for (int i = 0; i < 3; ++i) {
         Textbox* tmpTextbox = new Textbox(32, sf::Color::White, false);
@@ -54,6 +48,10 @@ Menu::Menu() {
     this->textboxes_->at(1)->setLimit(15);
     this->textboxes_->at(2)->setPosition(sf::Vector2f(this->portText_.getLocalBounds().width + xSpace, SCREEN_HEIGHT / 2 - this->portText_.getLocalBounds().height * 4));
     this->textboxes_->at(2)->setLimit(5);
+
+    this->button_ = new Button(sf::Vector2f(200, 50), sf::Color(0, 255, 0), "Play", 24, sf::Color::Black);
+    this->button_->setFont(this->font_);
+    this->button_->setPosition(sf::Vector2f(SCREEN_WIDTH - this->button_->getButton().getSize().x - 100, this->portText_.getPosition().y + this->portText_.getLocalBounds().height + 50));
 }
 
 Menu::~Menu() {
@@ -66,6 +64,9 @@ Menu::~Menu() {
     }
     delete this->textboxes_;
     this->textboxes_ = nullptr;
+
+    delete this->button_;
+    this->button_ = nullptr;
 }
 
 void Menu::render() {
@@ -78,11 +79,13 @@ void Menu::render() {
         this->window_->draw(this->name_);
         this->window_->draw(this->ipAddressText_);
         this->window_->draw(this->portText_);
-        this->window_->draw(this->continueText_);
 
         for (Textbox *textbox: *this->textboxes_) {
             this->window_->draw(textbox->getTextBox());
         }
+
+        this->window_->draw(this->button_->getButton());
+        this->window_->draw(this->button_->getText());
 
         this->window_->display();
 
@@ -90,10 +93,6 @@ void Menu::render() {
         while (this->window_->pollEvent(event)) {
             if (event.type == sf::Event::KeyPressed) {
                 switch (event.key.code) {
-                    case sf::Keyboard::Enter:
-                        this->gameStarted_ = true;
-                        break;
-
                     case sf::Keyboard::Up:
                         for (int i = 0; i < this->textboxes_->size(); ++i) {
                             if (this->textboxes_->at(i)->isSelected() && i > 0) {
@@ -119,6 +118,18 @@ void Menu::render() {
                     if (textbox->isSelected()) {
                         textbox->typed(event);
                     }
+                }
+            } else if (event.type == sf::Event::MouseMoved) {
+                if (this->button_->isMouseOver(*this->window_)) {
+                    this->button_->setBgColor(sf::Color(0, 153, 0));
+                    this->button_->setTextColor(sf::Color::White);
+                } else {
+                    this->button_->setBgColor(sf::Color(0, 255, 0));
+                    this->button_->setTextColor(sf::Color::Black);
+                }
+            } else if (event.type == sf::Event::MouseButtonPressed) {
+                if (this->button_->isMouseOver(*this->window_)) {
+                    this->gameStarted_ = true;
                 }
             }
         }

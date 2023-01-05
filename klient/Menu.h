@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include "Textbox.h"
+#include "Button.h"
 
 #ifndef KLIENT_MENU_H
 #define KLIENT_MENU_H
@@ -29,14 +30,12 @@ private:
     sf::Text ipAddressText_;
     sf::Text portText_;
 
-    sf::Text continueText_;
-
-
     sf::RenderWindow* window_;
     sf::IpAddress ipAddress_;
     unsigned short int port_;
 
     std::vector<Textbox*>* textboxes_;
+    Button* button_;
 };
 
 

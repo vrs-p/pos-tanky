@@ -14,6 +14,7 @@
 class Textbox {
 public:
     Textbox(int size, sf::Color color, bool isSelected);
+
     void setFont(sf::Font &font);
     void setPosition(sf::Vector2f position);
     void setLimit(bool hasLimit);
