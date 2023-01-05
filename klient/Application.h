@@ -43,12 +43,14 @@ public:
     void communicationWithServer();
     void updatePositionsOfTanks();
 
-    void run();
+    void run(sf::IpAddress ipAddress, int port);
 
     void sendData();
     void receiveData();
 
     void printScore();
+
+    sf::RenderWindow* getWindow();
 
 private:
     bool isRunning;
@@ -66,6 +68,7 @@ private:
     sf::RenderWindow* window_;
 
     sf::IpAddress ipAddress_;
+    int port_;
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
     unsigned short id_;

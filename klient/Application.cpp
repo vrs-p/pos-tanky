@@ -7,7 +7,7 @@
 Application::Application() {
     this->isRunning = true;
     this->packetSend_ = sf::Packet{};
-    this->ipAddress_ = sf::IpAddress("158.193.128.160");
+//    this->ipAddress_ = sf::IpAddress("158.193.128.160");
     this->id_ = 0;
     this->clientTank_ = new Tank();
     this->otherTanks = new std::vector<Tank *>();
@@ -38,6 +38,7 @@ Application::~Application() {
 
 void Application::render() {
     this->initializeWindow();
+    this->window_->setActive(true);
 
     while (this->isRunning) {
         this->readClientInput();
@@ -123,7 +124,9 @@ void Application::initializeWindow() {
     this->window_->setActive(true);
 }
 
-void Application::run() {
+void Application::run(sf::IpAddress ipAddress, int port) {
+    this->ipAddress_ = ipAddress;
+    this->port_ = port;
     this->sendDataBool = false;
     this->communicationWithServer();
     this->mutex = new std::mutex();
@@ -606,4 +609,8 @@ void Application::printScore() {
 
     this->window_->setActive(false);
     this->window_->close();
+}
+
+sf::RenderWindow *Application::getWindow() {
+    return this->window_;
 }
