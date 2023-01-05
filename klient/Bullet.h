@@ -16,6 +16,7 @@ public:
     bool wasFired() const;
     bool wasFiredAndSent() const;
     void setWasFiredAndSent();
+    void resetWasFiredAndSent();
     void setFired(bool fired);
     void shotBullet(float xPosition, float yPosition, DIRECTION direction);
     void moveBullet();

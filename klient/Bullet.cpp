@@ -2,10 +2,6 @@
 // Created by filip on 28. 12. 2022.
 //
 #include "Application.h"
-//#include "Bullet.h"
-
-
-//#include "Bullet.h"
 
 
 Bullet::Bullet() {
@@ -89,5 +85,9 @@ sf::Vector2f Bullet::getBulletSize() {
 
 sf::RectangleShape *Bullet::getBulletIcon() {
     return this->bulletIcon_;
+}
+
+void Bullet::resetWasFiredAndSent() {
+    this->firedAndSent_ = false;
 }
 

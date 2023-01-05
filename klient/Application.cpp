@@ -164,6 +164,7 @@ void Application::sendData() {
                 packetSend << this->clientTank_->getPlayerId();
                 std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer << "\n";
                 this->playerWasKilled = false;
+                this->clientTank_->getBullet()->resetWasFiredAndSent();
             } else if (this->isRunning) {
                 positionX = this->clientTank_->getSprite()->getPosition().x;
                 positionY = this->clientTank_->getSprite()->getPosition().y;
@@ -589,14 +590,14 @@ void Application::printScore() {
     textOthersScore.setString(stringOthersScore);
     textOthersScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textOthersScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 + textYourScore.getLocalBounds().height * 2));
 
-    while (showScore) {
-        window.clear();
-        window.draw(textGame);
-        window.draw(textEndGame);
-        window.draw(textYourScore);
-        window.draw(textOthersScore);
-        window.display();
+    window.clear();
+    window.draw(textGame);
+    window.draw(textEndGame);
+    window.draw(textYourScore);
+    window.draw(textOthersScore);
+    window.display();
 
+    while (showScore) {
         sf::Event event;
         while (this->window_->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
