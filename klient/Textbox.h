@@ -24,6 +24,7 @@ public:
     sf::Text getTextBox();
     bool isSelected();
     void typed(sf::Event event);
+    void setInitialText(std::string text);
 
 private:
     sf::Text textBox_;

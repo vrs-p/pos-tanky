@@ -52,6 +52,9 @@ Menu::Menu() {
     this->button_ = new Button(sf::Vector2f(200, 50), sf::Color(0, 255, 0), "Play", 24, sf::Color::Black);
     this->button_->setFont(this->font_);
     this->button_->setPosition(sf::Vector2f(SCREEN_WIDTH - this->button_->getButton().getSize().x - 100, this->portText_.getPosition().y + this->portText_.getLocalBounds().height + 50));
+
+    this->textboxes_->at(1)->setInitialText("158.193.128.160");
+    this->textboxes_->at(2)->setInitialText("13877");
 }
 
 Menu::~Menu() {

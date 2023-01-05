@@ -97,3 +97,8 @@ void Textbox::typed(sf::Event event) {
         }
     }
 }
+
+void Textbox::setInitialText(std::string text) {
+    this->text_ << text;
+    this->textBox_.setString(this->text_.str());
+}
