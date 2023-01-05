@@ -18,12 +18,14 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
+
 enum TYPES_MESSAGES {
     STATUS,
     KILLED,
     END,
     PLAYER_QUIT
 };
+
 
 class Application {
 public:
@@ -43,12 +45,15 @@ public:
     void communicationWithServer();
     void updatePositionsOfTanks();
 
-    void run();
+    void run(sf::IpAddress ipAddress, int port);
 
     void sendData();
     void receiveData();
 
-    void printScore();
+    sf::RenderWindow* getWindow();
+
+    int getPlayerScore();
+    std::vector<Tank*>* getOthersTanks();
 
 private:
     bool isRunning;
@@ -66,6 +71,7 @@ private:
     sf::RenderWindow* window_;
 
     sf::IpAddress ipAddress_;
+    int port_;
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
     unsigned short id_;
