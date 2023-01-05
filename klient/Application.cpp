@@ -4,6 +4,7 @@
 
 #include "Application.h"
 
+
 Application::Application() {
     this->isRunning = true;
     this->packetSend_ = sf::Packet{};
@@ -557,60 +558,14 @@ void Application::checkBulletCollision() {
     }
 }
 
-void Application::printScore() {
-    this->initializeWindow();
-    bool showScore = true;
-    sf::Font font;
-    font.loadFromFile("../font/consola.ttf");
-    sf::Text textGame;
-    textGame.setFont(font);
-    textGame.setCharacterSize(32);
-    textGame.setFillColor(sf::Color::White);
-    textGame.setString("POS-Tanks");
-    textGame.setPosition(sf::Vector2f((SCREEN_WIDTH - textGame.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 - textGame.getLocalBounds().height * 11));
-    sf::Text textEndGame;
-    textEndGame.setFont(font);
-    textEndGame.setCharacterSize(24);
-    textEndGame.setFillColor(sf::Color::White);
-    textEndGame.setString("Game Over");
-    textEndGame.setPosition(sf::Vector2f((SCREEN_WIDTH - textEndGame.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 - textGame.getLocalBounds().height * 9));
-    sf::Text textYourScore;
-    textYourScore.setFont(font);
-    textYourScore.setCharacterSize(32);
-    textYourScore.setFillColor(sf::Color::White);
-    textYourScore.setString("Your score is: " + std::to_string(this->clientTank_->getScore()));
-    textYourScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textYourScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2));
-    sf::Text textOthersScore;
-    textOthersScore.setFont(font);
-    textOthersScore.setCharacterSize(32);
-    textOthersScore.setFillColor(sf::Color::White);
-    std::string stringOthersScore;
-    for (Tank* tank: *this->otherTanks) {
-        stringOthersScore.append("Score of player " + std::to_string(tank->getPlayerId()) + " is: " + std::to_string(tank->getScore()) + "\n");
-    }
-    textOthersScore.setString(stringOthersScore);
-    textOthersScore.setPosition(sf::Vector2f((SCREEN_WIDTH - textOthersScore.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 + textYourScore.getLocalBounds().height * 2));
-
-    this->window_->clear();
-    this->window_->draw(textGame);
-    this->window_->draw(textEndGame);
-    this->window_->draw(textYourScore);
-    this->window_->draw(textOthersScore);
-    this->window_->display();
-
-    while (showScore) {
-        sf::Event event;
-        while (this->window_->pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                showScore = false;
-            }
-        }
-    }
-
-    this->window_->setActive(false);
-    this->window_->close();
-}
-
 sf::RenderWindow *Application::getWindow() {
     return this->window_;
+}
+
+int Application::getPlayerScore() {
+    return this->clientTank_->getPlayerId();
+}
+
+std::vector<Tank *> *Application::getOthersTanks() {
+    return this->otherTanks;
 }

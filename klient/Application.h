@@ -18,12 +18,14 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
+
 enum TYPES_MESSAGES {
     STATUS,
     KILLED,
     END,
     PLAYER_QUIT
 };
+
 
 class Application {
 public:
@@ -48,9 +50,10 @@ public:
     void sendData();
     void receiveData();
 
-    void printScore();
-
     sf::RenderWindow* getWindow();
+
+    int getPlayerScore();
+    std::vector<Tank*>* getOthersTanks();
 
 private:
     bool isRunning;

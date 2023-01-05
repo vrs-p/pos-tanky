@@ -1,9 +1,9 @@
 //
 // Created by filip on 5. 1. 2023.
 //
+#include "Menu.h"
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
-#include "Menu.h"
 
 Menu::Menu() {
     float xPosition = 50.0;
