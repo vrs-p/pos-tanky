@@ -110,4 +110,12 @@ int Client::getScore() {
     return this->score_;
 }
 
+void Client::lockMutex() {
+    this->mutex_.lock();
+}
+
+void Client::unlockMutex() {
+    this->mutex_.unlock();
+}
+
 

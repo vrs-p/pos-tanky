@@ -196,17 +196,20 @@ void Application::sendData() {
                 this->packetSend_ << (static_cast<int>(STATUS) + 1);
                 for (Client *clientInfo: *this->clients_) {
                     if (clientInfo->getClientId() != client->getClientId()) {
+                        clientInfo->lockMutex();
                         this->packetSend_ << clientInfo->getClientId();
                         this->packetSend_ << clientInfo->getPosition()->xPosition_;
                         this->packetSend_ << clientInfo->getPosition()->yPosition_;
                         this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);
                         this->packetSend_ << clientInfo->getFired();
+                        clientInfo->unlockMutex();
                     }
                 }
                 if (this->socket_.send(this->packetSend_, client->getConnetcion()->ipAddress_, client->getConnetcion()->port_) == sf::Socket::Done) {
                     //            std::cout << "Data were sent to client to client with ID: " << client->getClientId() << "\n";
                 }
             } else if (client->wasKilled() && !client->getLeft()) {
+                client->lockMutex();
                 client->resetPosition();
                 this->packetSend_ << (static_cast<int>(KILLED) + 1);
                 this->packetSend_ << client->getClientId();
@@ -214,14 +217,17 @@ void Application::sendData() {
                 this->packetSend_ << client->getPosition()->yPosition_;
                 this->packetSend_ << static_cast<int>(client->getPosition()->direction_);
                 this->packetSend_ << client->getKilledBy();
+                client->unlockMutex();
 
                 for (Client *clientKilled: *this->clients_) {
                     this->socket_.send(this->packetSend_, clientKilled->getConnetcion()->ipAddress_, clientKilled->getConnetcion()->port_);
                 }
             } else if (client->getLeft() && !client->wasScoreSent()) {
                 std::cout << "Client " << client->getClientId() << " left\n";
+                client->lockMutex();
                 this->packetSend_ << (static_cast<int>(PLAYER_QUIT) + 1);
                 this->packetSend_ << client->getClientId();
+                client->unlockMutex();
                 for (Client *clientInform: *this->clients_) {
                     this->socket_.send(this->packetSend_, clientInform->getConnetcion()->ipAddress_, clientInform->getConnetcion()->port_);
                 }
@@ -268,10 +274,12 @@ void Application::receiveData() {
             packetReceive >> pFIred;
             for (Client* client : *this->clients_) {
                 if (client->getClientId() == pId) {
+                    client->lockMutex();
                     client->getPosition()->xPosition_ = tmpX;
                     client->getPosition()->yPosition_ = tmpY;
                     client->getPosition()->direction_ = static_cast<DIRECTION>(tmpDir);
                     client->setFired(pFIred);
+                    client->unlockMutex();
                 }
             }
         } else if (static_cast<TYPES_MESSAGES>(messageType) == KILLED) {
@@ -280,8 +288,10 @@ void Application::receiveData() {
             std::cout << "Killer: " << killer;
             for (Client* client : *this->clients_) {
                 if (client->getClientId() == pId) {
+                    client->lockMutex();
                     client->killed();
                     client->setKilledBy(killer);
+                    client->unlockMutex();
                 } else if (client->getClientId() == killer) {
                     client->increaseScore();
                 }
@@ -289,8 +299,11 @@ void Application::receiveData() {
         } else if (static_cast<TYPES_MESSAGES>(messageType) == END) {
             packetReceive >> pId;
             for (Client* client : *this->clients_) {
-                if (client->getClientId() == pId)
+                if (client->getClientId() == pId) {
+                    client->lockMutex();
                     client->setLeft(true);
+                    client->unlockMutex();
+                }
             }
             this->numberOfLeftPlayers++;
             if (this->clients_->size() == numberOfLeftPlayers) {

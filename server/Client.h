@@ -2,6 +2,7 @@
 // Created by filip on 30. 12. 2022.
 //
 #include <SFML/Network.hpp>
+#include <mutex>
 #ifndef SERVER_CLIENT_H
 #define SERVER_CLIENT_H
 enum DIRECTION {UP,
@@ -46,6 +47,9 @@ public:
     bool setScoreWasSent(bool sent);
     int getScore();
 
+    void lockMutex();
+    void unlockMutex();
+
 private:
     int id_;
     int score_;
@@ -57,6 +61,8 @@ private:
     CONNECTION* connection_;
     POSITION* position_;
     POSITION* initialPosition_;
+
+    std::mutex mutex_;
 
 };
 
