@@ -75,6 +75,8 @@ private:
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
     unsigned short id_;
+    sf::Font font_;
+    sf::Text nameOfPlayer_;
 };
 
 

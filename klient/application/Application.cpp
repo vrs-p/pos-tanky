@@ -15,6 +15,10 @@ Application::Application() {
     this->clientTank_ = new Tank();
     this->otherTanks = new std::vector<Tank *>();
     this->playerWasKilled = false;
+    this->font_.loadFromFile("../font/consola.ttf");
+    this->nameOfPlayer_.setFont(this->font_);
+    this->nameOfPlayer_.setCharacterSize(11);
+    this->nameOfPlayer_.setFillColor(sf::Color::White);
 }
 
 Application::~Application() {
@@ -56,7 +60,42 @@ void Application::render() {
 
 void Application::draw() {
     this->window_->clear();
+
     this->clientTank_->render(*this->window_);
+
+    float tankPosX = this->clientTank_->getSprite()->getPosition().x;
+    float tankPosY = this->clientTank_->getSprite()->getPosition().y;
+    float tankSizeX = this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
+    float tankSizeY = this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
+
+    switch (this->clientTank_->getDirection()) {
+        case UP:
+            this->nameOfPlayer_.setPosition(tankPosX + tankSizeX / 2 - this->nameOfPlayer_.getLocalBounds().width / 2, tankPosY + tankSizeY + 5);
+            break;
+
+        case DOWN:
+            this->nameOfPlayer_.setPosition(tankPosX - tankSizeX / 2 - this->nameOfPlayer_.getLocalBounds().width / 2, tankPosY - tankSizeY - this->nameOfPlayer_.getLocalBounds().height - 10);
+            break;
+
+        case LEFT:
+            if (this->nameOfPlayer_.getLocalBounds().width <= tankSizeY) {
+                this->nameOfPlayer_.setPosition(tankPosX + tankSizeY - this->nameOfPlayer_.getLocalBounds().width, tankPosY + 5);
+            } else {
+                this->nameOfPlayer_.setPosition(tankPosX + tankSizeY / 2 - this->nameOfPlayer_.getLocalBounds().width / 2, tankPosY + 5);
+            }
+            break;
+
+        case RIGHT:
+            if (this->nameOfPlayer_.getLocalBounds().width <= tankSizeY) {
+                this->nameOfPlayer_.setPosition(tankPosX - tankSizeY, tankPosY + tankSizeX + 5);
+            } else {
+                this->nameOfPlayer_.setPosition(tankPosX - tankSizeY / 2 - this->nameOfPlayer_.getLocalBounds().width / 2,tankPosY + tankSizeX + 5);
+            }
+            break;
+    }
+
+    this->window_->draw(this->nameOfPlayer_);
+
     for (Tank *tank: *this->otherTanks) {
         tank->lockMutex();
         if (!tank->getLeft())
@@ -130,6 +169,7 @@ void Application::initializeWindow() {
 void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
     this->ipAddress_ = ipAddress;
     this->port_ = port;
+    this->nameOfPlayer_.setString(playerName);
     this->clientTank_->setPlayerName(std::move(playerName));
     this->sendDataBool = false;
     this->communicationWithServer();
@@ -230,13 +270,13 @@ void Application::connectToServer() {
             tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
                           this->clientTank_->getSprite()->getScale().x / 2;
             tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y;
+                          this->clientTank_->getSprite()->getScale().y - 20;
             break;
         case DOWN:
             tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
                           this->clientTank_->getSprite()->getScale().x / 2;
             tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y / 3;
+                          this->clientTank_->getSprite()->getScale().y / 3 + 20;
             break;
         case LEFT:
             tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
