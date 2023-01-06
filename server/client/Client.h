@@ -26,26 +26,29 @@ public:
     Client(int id, std::string pName, float xPosition, float yPosition, DIRECTION direction, unsigned short port, sf::IpAddress ipAddress);
     ~Client();
 
-    void updatePosition(float xPosition, float yPosition, DIRECTION direction);
 
     POSITION* getPosition();
-    CONNECTION* getConnetcion();
-    int getClientId();
+    CONNECTION* getConnection();
 
     bool getFired();
-    void setFired(bool fired);
+    bool wasKilled();
+    bool getLeft();
+    bool wasScoreSent();
+
+    int getClientId();
+    int getKilledBy();
+    int getScore();
+
+    void updatePosition(float xPosition, float yPosition, DIRECTION direction);
     void setInitialPosition(float xPosition, float yPosition, DIRECTION direction);
+    void setFired(bool fired);
     void resetPosition();
     void killed();
-    bool wasKilled();
-    void increaseScore();
     void setKilledBy(int pId);
-    int getKilledBy();
-    bool getLeft();
     void setLeft(bool left);
-    bool wasScoreSent();
-    bool setScoreWasSent(bool sent);
-    int getScore();
+    void increaseScore();
+    void setScoreWasSent(bool sent);
+
     std::string getPlayerName();
 
     void lockMutex();
@@ -59,7 +62,7 @@ private:
     bool fired_;
     bool killed_;
     bool scoreWasSent_;
-    std::string playerName;
+    std::string playerName_;
     CONNECTION* connection_;
     POSITION* position_;
     POSITION* initialPosition_;

@@ -28,33 +28,29 @@ public:
     Application();
     ~Application();
 
-
     void run();
 
     void initializeSocket();
     void initializeGame();
+    void updateOfTanksPositions();
     void waitForClients();
-    void communicate();
 
     void sendData();
     void receiveData();
-    void updateOfTanksPositions();
 
 private:
-    bool isRunning;
-    int numberOfLeftPlayers;
+    bool isRunning_;
+    int numberOfLeftPlayers_;
     std::vector<Client*>* clients_;
 
-    bool sendDataBool;
-    std::mutex* mutex;
-    std::condition_variable* sendDataCond;
+    bool sendDataBool_;
+    std::mutex* mutex_;
+    std::condition_variable* sendDataCond_;
 
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
     sf::Packet packetReceive_;
     sf::IpAddress ipAddress_;
-    unsigned short port_;
-    bool clientReadyToPlay_;
 };
 
 
