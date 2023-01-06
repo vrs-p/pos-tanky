@@ -1,6 +1,6 @@
 #include <iostream>
 #include<SFML/Network.hpp>
-#include "Application.h"
+#include "application/Application.h"
 
 int main() {
     Application app;

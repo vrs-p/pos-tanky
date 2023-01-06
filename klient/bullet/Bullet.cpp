@@ -1,7 +1,7 @@
 //
 // Created by filip on 28. 12. 2022.
 //
-#include "Application.h"
+#include "Bullet.h"
 
 
 Bullet::Bullet() {
@@ -35,8 +35,8 @@ void Bullet::shotBullet(float xPosition, float yPosition, DIRECTION direction) {
 void Bullet::render(sf::RenderWindow &window) {
     float xPosition = this->bulletIcon_->getPosition().x;
     float yPosition = this->bulletIcon_->getPosition().y;
-    if (xPosition > 0 && xPosition < SCREEN_WIDTH &&
-        yPosition > 0 && yPosition < SCREEN_HEIGHT &&
+    if (xPosition > 0 && xPosition < 800 &&
+        yPosition > 0 && yPosition < 800 &&
         this->fired_)
     {
         moveBullet();

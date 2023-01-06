@@ -10,7 +10,7 @@
 #include <SFML/Network.hpp>
 #include <condition_variable>
 #include <mutex>
-#include "Tank.h"
+#include "../tank/Tank.h"
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H

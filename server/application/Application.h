@@ -11,7 +11,7 @@
 #include <SFML/Network.hpp>
 #include <mutex>
 #include <condition_variable>
-#include "Client.h"
+#include "../client/Client.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;

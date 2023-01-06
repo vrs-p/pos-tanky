@@ -1,9 +1,8 @@
 #include <iostream>
 
-#include "Application.h"
-#include "Menu.h"
-#include "ShowScore.h"
-#include<SFML/Network.hpp>
+#include "application/Application.h"
+#include "windows/Menu.h"
+#include "windows/ShowScore.h"
 
 //const int SCREEN_WIDTH = 800;
 //const int SCREEN_HEIGHT = 800;

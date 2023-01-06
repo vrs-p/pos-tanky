@@ -4,12 +4,12 @@ project(klient)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SFML_STATIC_LIBRARIES TRUE)
-set(SFML_DIR C:/Users/filip/Desktop/POS/sfml/lib/cmake/SFML)
-find_package(SFML COMPONENTS system window graphics audio network REQUIRED)
+set(SFML_DIR src/lib/cmake/SFML)
+find_package(SFML COMPONENTS window graphics network REQUIRED)
 
-include_directories(C:/Users/filip/Desktop/POS/sfml/include)
+include_directories(src/include)
 
 
-add_executable(klient main.cpp Tank.cpp Tank.h Application.cpp Application.h Bullet.h Bullet.cpp Menu.cpp Menu.h ShowScore.cpp ShowScore.h Textbox.cpp Textbox.h Button.cpp Button.h)
+add_executable(klient main.cpp tank/Tank.cpp tank/Tank.h application/Application.cpp application/Application.h bullet/Bullet.h bullet/Bullet.cpp windows/Menu.cpp windows/Menu.h windows/ShowScore.cpp windows/ShowScore.h windows/elements/Textbox.cpp windows/elements/Textbox.h windows/elements/Button.cpp windows/elements/Button.h)
 
-target_link_libraries(klient sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
+target_link_libraries(klient sfml-window sfml-graphics sfml-network)

@@ -5,10 +5,10 @@ all: server
 main.o: main.cpp
 	g++ -c "main.cpp" -o main.o
 
-Client.o: Client.h Client.cpp
+Client.o: client/Client.h client/Client.cpp
 	g++ -c "Client.cpp" -o Client.o
 
-Application.o: Application.h Application.cpp
+Application.o: application/Application.h application/Application.cpp
 	g++ -c "Application.cpp" -o Application.o
 
 server: main.o Client.o Application.o

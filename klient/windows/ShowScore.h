@@ -3,7 +3,7 @@
 //
 
 #include <SFML/Graphics.hpp>
-#include "Tank.h"
+#include "../tank/Tank.h"
 
 #ifndef KLIENT_SHOWSCORE_H
 #define KLIENT_SHOWSCORE_H

@@ -3,8 +3,8 @@
 //
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
-#include "Textbox.h"
-#include "Button.h"
+#include "elements/Textbox.h"
+#include "elements/Button.h"
 
 #ifndef KLIENT_MENU_H
 #define KLIENT_MENU_H

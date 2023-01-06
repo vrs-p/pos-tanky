@@ -7,7 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <mutex>
-#include "Bullet.h"
+#include "../bullet/Bullet.h"
 
 
 class Tank {
