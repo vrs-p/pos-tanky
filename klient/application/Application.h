@@ -32,51 +32,46 @@ public:
     Application();
     ~Application();
 
-
-    void render();
-    void readClientInput();
-    void checkBorders();
-    void checkBulletCollision();
-    void draw();
-    void initializeWindow();
-    void connectToServer();
-    void waitForGameSettings();
-
-    void communicationWithServer();
-    void updatePositionsOfTanks();
-
     void run(sf::IpAddress ipAddress, int port, std::string playerName);
-
-    void sendData();
-    void receiveData();
-
-    sf::RenderWindow* getWindow();
-
     int getPlayerScore();
     std::vector<Tank*>* getOthersTanks();
 
 private:
-    bool isRunning;
-    int numberOfPlayers_;
-    bool playerWasKilled;
-    int idOfKilledPlayer;
-    bool sendDataBool;
-    std::mutex* mutex;
-    std::condition_variable* sendDataCond;
-
-
-    Tank* clientTank_;
-    std::vector<Tank*>* otherTanks;
-
-    sf::RenderWindow* window_;
-
     sf::IpAddress ipAddress_;
-    int port_;
     sf::UdpSocket socket_;
     sf::Packet packetSend_;
     unsigned short id_;
+
+    int numberOfPlayers_;
+    bool isRunning_;
+    bool sendDataBool_;
+    bool playerWasKilled_;
+    int idOfKilledPlayer_;
+
+    std::mutex* mutex_;
+    std::condition_variable* sendDataCond_;
+    sf::RenderWindow* window_;
     sf::Font font_;
     sf::Text nameOfPlayer_;
+    Tank* clientTank_;
+    std::vector<Tank*>* otherTanks_;
+
+    void communicationWithServer();
+    void connectToServer();
+
+    void waitForGameSettings();
+    void render();
+    void initializeWindow();
+    void readClientInput();
+    void checkBorders();
+    void checkBulletCollision();
+
+    void draw();
+
+    void receiveData();
+    void sendData();
+
+    void updatePositionsOfTanks();
 };
 
 

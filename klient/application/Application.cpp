@@ -1,45 +1,229 @@
 //
 // Created by vrsp on 28. 12. 2022.
 //
-
-#include "Application.h"
-
 #include <utility>
+#include "Application.h"
 
 
 Application::Application() {
-    this->isRunning = true;
     this->packetSend_ = sf::Packet{};
-//    this->ipAddress_ = sf::IpAddress("158.193.128.160");
     this->id_ = 0;
-    this->clientTank_ = new Tank();
-    this->otherTanks = new std::vector<Tank *>();
-    this->playerWasKilled = false;
+
+    this->isRunning_ = true;
+    this->playerWasKilled_ = false;
+
     this->font_.loadFromFile("../font/consola.ttf");
     this->nameOfPlayer_.setFont(this->font_);
     this->nameOfPlayer_.setCharacterSize(11);
     this->nameOfPlayer_.setFillColor(sf::Color::White);
+    this->clientTank_ = new Tank();
+    this->otherTanks_ = new std::vector<Tank *>();
 }
 
 Application::~Application() {
-    delete this->mutex;
-    this->mutex = nullptr;
+    delete this->mutex_;
+    this->mutex_ = nullptr;
 
-    delete this->sendDataCond;
-    this->sendDataCond = nullptr;
+    delete this->sendDataCond_;
+    this->sendDataCond_ = nullptr;
+
+    delete this->window_;
+    this->window_ = nullptr;
 
     delete this->clientTank_;
     this->clientTank_ = nullptr;
 
-    for (int i = this->otherTanks->size() - 1; i >= 0; i--) {
-        delete this->otherTanks->at(i);
+    for (int i = this->otherTanks_->size() - 1; i >= 0; i--) {
+        delete this->otherTanks_->at(i);
 
     }
-    delete this->otherTanks;
-    this->otherTanks = nullptr;
+    delete this->otherTanks_;
+    this->otherTanks_ = nullptr;
+}
 
-    delete this->window_;
-    this->window_ = nullptr;
+void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
+    this->ipAddress_ = ipAddress;
+    this->sendDataBool_ = false;
+    this->nameOfPlayer_.setString(playerName);
+    this->clientTank_->setPlayerName(std::move(playerName));
+
+    this->communicationWithServer();
+
+    this->mutex_ = new std::mutex();
+    this->sendDataCond_ = new std::condition_variable();
+
+    if (this->isRunning_) {
+        std::thread renderingThread(&Application::render, this);
+        std::thread receivingData(&Application::receiveData, this);
+        std::thread sendingThread(&Application::sendData, this);
+        receivingData.join();
+        sendingThread.join();
+        renderingThread.join();
+    }
+}
+
+int Application::getPlayerScore() {
+    return this->clientTank_->getScore();
+}
+
+std::vector<Tank *> *Application::getOthersTanks() {
+    return this->otherTanks_;
+}
+
+void Application::communicationWithServer() {
+    this->connectToServer();
+    this->updatePositionsOfTanks();
+    this->waitForGameSettings();
+}
+
+void Application::connectToServer() {
+    this->packetSend_.clear();
+    this->packetSend_ << this->clientTank_->getPlayerName();
+    if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
+        std::cout << "Sending failed" << "\n";
+    }
+
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+    float tmpX, tmpY;
+    int tmpDir, tmpID, numberOfPlayers;
+    sf::Packet packetReceive = sf::Packet{};
+    packetReceive.clear();
+
+    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+        packetReceive >> tmpX;
+        packetReceive >> tmpY;
+        packetReceive >> tmpID;
+        packetReceive >> tmpDir;
+        packetReceive >> numberOfPlayers;
+    }
+
+    switch (static_cast<DIRECTION>(tmpDir)) {
+        case UP:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
+                          this->clientTank_->getSprite()->getScale().x / 2;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                          this->clientTank_->getSprite()->getScale().y - 20;
+            break;
+
+        case DOWN:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
+                          this->clientTank_->getSprite()->getScale().x / 2;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                          this->clientTank_->getSprite()->getScale().y / 3 + 20;
+            break;
+
+        case LEFT:
+            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
+                          this->clientTank_->getSprite()->getScale().x;
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                          this->clientTank_->getSprite()->getScale().y * 2 / 3;
+            break;
+
+        case RIGHT:
+            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                          this->clientTank_->getSprite()->getScale().y * 2 / 3;
+            break;
+    }
+
+    switch (tmpID) {
+        case 2:
+            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 0, 192));
+            break;
+
+        case 3:
+            this->clientTank_->getSprite()->setColor(sf::Color(255, 0, 0, 192));
+            break;
+
+        case 4:
+            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 255, 192));
+            break;
+
+        default:
+            break;
+    }
+
+    this->id_ = tmpID;
+    this->numberOfPlayers_ = numberOfPlayers;
+    this->clientTank_->getSprite()->setPosition(tmpX, tmpY);
+    this->clientTank_->rotate(static_cast<DIRECTION>(tmpDir));
+    this->clientTank_->setDirection(static_cast<DIRECTION>(tmpDir));
+    this->clientTank_->setPlayerId(tmpID);
+
+    std::cout << "X: " << tmpX << " Y: " << tmpY << " ID: " << tmpID << "\n";
+}
+
+void Application::waitForGameSettings() {
+    sf::Packet packetReceive = sf::Packet{};
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+    int pId, direction;
+    float positionX, positionY;
+    std::string pName;
+
+    packetReceive.clear();
+
+    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
+        std::cout << "Packet with game settings was received\n";
+
+    for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
+        packetReceive >> pId;
+        packetReceive >> pName;
+        packetReceive >> positionX;
+        packetReceive >> positionY;
+        packetReceive >> direction;
+        Tank *tmpTank = new Tank();
+        tmpTank->setPlayerId(pId);
+        tmpTank->setPlayerName(pName);
+
+        switch (static_cast<DIRECTION>(direction)) {
+            case UP:
+                break;
+
+            case DOWN:
+                tmpTank->setDirection(DOWN);
+                tmpTank->rotate(UP);
+                tmpTank->setDirection(DOWN);
+                break;
+
+            case LEFT:
+                positionX = positionX + this->clientTank_->getSprite()->getTexture()->getSize().y *
+                                        this->clientTank_->getSprite()->getScale().y -
+                            this->clientTank_->getSprite()->getTexture()->getSize().x *
+                            this->clientTank_->getSprite()->getScale().x;
+                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                                        this->clientTank_->getSprite()->getScale().y;
+                break;
+
+            case RIGHT:
+                positionX = positionX - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                                        this->clientTank_->getSprite()->getScale().y;
+                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y *
+                                        this->clientTank_->getSprite()->getScale().y +
+                            this->clientTank_->getSprite()->getTexture()->getSize().x *
+                            this->clientTank_->getSprite()->getScale().x;
+                break;
+        }
+
+        switch (tmpTank->getPlayerId()) {
+            case 2:
+                tmpTank->getSprite()->setColor(sf::Color(0, 255, 0, 192));
+                break;
+
+            case 3:
+                tmpTank->getSprite()->setColor(sf::Color(255, 0, 0, 192));
+                break;
+
+            case 4:
+                tmpTank->getSprite()->setColor(sf::Color(0, 255, 255, 192));
+                break;
+        }
+
+        tmpTank->getSprite()->setPosition(positionX, positionY);
+        tmpTank->rotate(static_cast<DIRECTION>(direction));
+
+        this->otherTanks_->push_back(tmpTank);
+    }
 
 }
 
@@ -47,15 +231,157 @@ void Application::render() {
     this->initializeWindow();
     this->window_->setActive(true);
 
-    while (this->isRunning) {
+    while (this->isRunning_) {
         this->readClientInput();
         this->checkBorders();
         this->checkBulletCollision();
         this->draw();
     }
+
     this->window_->setActive(false);
     this->window_->close();
-    std::cout << "End of rendering data\n";
+}
+
+void Application::initializeWindow() {
+    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
+    this->window_->setFramerateLimit(60);
+    this->window_->setActive(true);
+}
+
+void Application::readClientInput() {
+    sf::Event event;
+    while (this->window_->pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            this->clientTank_->setLeft(true);
+            std::unique_lock<std::mutex> loc(*this->mutex_);
+            this->sendDataBool_ = true;
+            this->sendDataCond_->notify_one();
+        } else if (event.type == sf::Event::KeyPressed) {
+            switch (event.key.code) {
+                case sf::Keyboard::Up:
+                    this->clientTank_->moveUp();
+                    break;
+
+                case sf::Keyboard::Down:
+                    this->clientTank_->moveDown();
+                    break;
+
+                case sf::Keyboard::Left:
+                    this->clientTank_->moveLeft();
+                    break;
+
+                case sf::Keyboard::Right:
+                    this->clientTank_->moveRight();
+                    break;
+
+                case sf::Keyboard::Space:
+                    this->clientTank_->fire();
+                    break;
+
+                case sf::Keyboard::Q:
+                case sf::Keyboard::Escape:
+                    this->clientTank_->setLeft(true);
+                    break;
+            }
+
+            std::unique_lock<std::mutex> loc(*this->mutex_);
+            this->sendDataBool_ = true;
+            this->sendDataCond_->notify_one();
+        }
+    }
+}
+
+void Application::checkBorders() {
+    float xPosition = this->clientTank_->getSprite()->getPosition().x;
+    float yPosition = this->clientTank_->getSprite()->getPosition().y;
+
+    if (xPosition > SCREEN_WIDTH) {
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
+    }
+
+    if (xPosition < 0) {
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(0, yPosition));
+    }
+
+    if (yPosition > SCREEN_HEIGHT) {
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, SCREEN_HEIGHT));
+    }
+
+    if (yPosition < 0) {
+        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, 0));
+    }
+}
+
+void Application::checkBulletCollision() {
+    Bullet *bullet = this->clientTank_->getBullet();
+
+    if (bullet != nullptr) {
+        if (bullet->wasFired()) {
+            float bulletPosX = bullet->getBulletPosition().x;
+            float bulletPosY = bullet->getBulletPosition().y;
+            float bulletSizeX = bullet->getBulletSize().x;
+            float bulletSizeY = bullet->getBulletSize().y;
+
+            for (Tank *tank: *this->otherTanks_) {
+                float tankPosX = tank->getSprite()->getPosition().x;
+                float tankPosY = tank->getSprite()->getPosition().y;
+                float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
+                float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
+
+                if (bullet->wasFired()) {
+                    switch (tank->getDirection()) {
+                        case UP:
+                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeX &&
+                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeY) {
+                                bullet->setFired(false);
+                                this->playerWasKilled_ = true;
+                                this->idOfKilledPlayer_ = tank->getPlayerId();
+                                std::unique_lock<std::mutex> loc(*this->mutex_);
+                                this->sendDataBool_ = true;
+                                this->sendDataCond_->notify_one();
+                            }
+                            break;
+
+                        case DOWN:
+                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
+                                bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
+                                bullet->setFired(false);
+                                this->playerWasKilled_ = true;
+                                this->idOfKilledPlayer_ = tank->getPlayerId();
+                                std::unique_lock<std::mutex> loc(*this->mutex_);
+                                this->sendDataBool_ = true;
+                                this->sendDataCond_->notify_one();
+                            }
+                            break;
+
+                        case LEFT:
+                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
+                                bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
+                                bullet->setFired(false);
+                                this->playerWasKilled_ = true;
+                                this->idOfKilledPlayer_ = tank->getPlayerId();
+                                std::unique_lock<std::mutex> loc(*this->mutex_);
+                                this->sendDataBool_ = true;
+                                this->sendDataCond_->notify_one();
+                            }
+                            break;
+
+                        case RIGHT:
+                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
+                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
+                                bullet->setFired(false);
+                                this->playerWasKilled_ = true;
+                                this->idOfKilledPlayer_ = tank->getPlayerId();
+                                std::unique_lock<std::mutex> loc(*this->mutex_);
+                                this->sendDataBool_ = true;
+                                this->sendDataCond_->notify_one();
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Application::draw() {
@@ -96,106 +422,136 @@ void Application::draw() {
 
     this->window_->draw(this->nameOfPlayer_);
 
-    for (Tank *tank: *this->otherTanks) {
+    for (Tank *tank: *this->otherTanks_) {
         tank->lockMutex();
-        if (!tank->getLeft())
+        if (!tank->getLeft()) {
             tank->render(*this->window_);
+        }
         tank->unlockMutex();
     }
 
     this->window_->display();
 }
 
-void Application::readClientInput() {
-    sf::Event event;
-    while (this->window_->pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
-            this->clientTank_->setLeft(true);
-            std::unique_lock<std::mutex> loc(*this->mutex);
-            this->sendDataBool = true;
-            this->sendDataCond->notify_one();
-        } else if (event.type == sf::Event::KeyPressed) {
-            switch (event.key.code) {
-                case sf::Keyboard::Up:
-                    this->clientTank_->moveUp();
-                    break;
-                case sf::Keyboard::Down:
-                    this->clientTank_->moveDown();
-                    break;
-                case sf::Keyboard::Left:
-                    this->clientTank_->moveLeft();
-                    break;
-                case sf::Keyboard::Right:
-                    this->clientTank_->moveRight();
-                    break;
-                case sf::Keyboard::Space:
-                    this->clientTank_->fire();
-                    break;
-                case sf::Keyboard::Q:
-                case sf::Keyboard::Escape:
-                    this->clientTank_->setLeft(true);
+void Application::receiveData() {
+    sf::Packet packetReceive = sf::Packet{};
+    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    unsigned short port;
+    int pId, direction;
+    float positionX, positionY;
+    bool fired;
+    int messageType, killerId, score;
 
+    while (this->isRunning_) {
+        packetReceive.clear();
+        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
+            packetReceive >> messageType;
+            messageType--;
+
+            if (static_cast<TYPES_MESSAGES>(messageType) == STATUS) {
+                for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
+                    packetReceive >> pId;
+                    packetReceive >> positionX;
+                    packetReceive >> positionY;
+                    packetReceive >> direction;
+                    packetReceive >> fired;
+
+                    for (Tank *tank: *this->otherTanks_) {
+                        tank->lockMutex();
+                        if (tank->getPlayerId() == pId) {
+                            if (tank->getDirection() != direction) {
+                                tank->rotate(static_cast<DIRECTION>(direction));
+                            }
+
+                            tank->getSprite()->setPosition(positionX, positionY);
+
+                            if (fired) {
+                                tank->fire();
+                            }
+                        }
+                        tank->unlockMutex();
+                    }
+                }
+            } else if (static_cast<TYPES_MESSAGES>(messageType) == KILLED) {
+                packetReceive >> pId;
+                packetReceive >> positionX;
+                packetReceive >> positionY;
+                packetReceive >> direction;
+                packetReceive >> killerId;
+
+                std::cout << "Killed player: " << pId << "Killer is: " << killerId;
+
+                if (pId == this->id_) {
+                    this->clientTank_->getBullet()->setFired(false);
+                    this->clientTank_->rotate(static_cast<DIRECTION>(direction));
+                    this->clientTank_->getSprite()->setPosition(positionX, positionY);
+                } else {
+                    for(Tank* tank: *this->otherTanks_) {
+                        tank->lockMutex();
+                        if (tank->getPlayerId() == pId) {
+                            tank->getBullet()->setFired(false);
+
+                            if (tank->getDirection() != direction) {
+                                tank->rotate(static_cast<DIRECTION>(direction));
+                            }
+
+                            tank->getSprite()->setPosition(positionX, positionY);
+                        }
+                        tank->unlockMutex();
+                    }
+                }
+
+                for(Tank* tank: *this->otherTanks_) {
+                    if (tank->getPlayerId() == killerId) {
+                        tank->getBullet()->setFired(false);
+                    }
+                }
+            } else if (static_cast<TYPES_MESSAGES>(messageType) == END) {
+                for (int i = 0; i < this->numberOfPlayers_; ++i) {
+                    packetReceive >> pId;
+                    packetReceive >> score;
+
+                    if (this->clientTank_->getPlayerId() == pId) {
+                        this->clientTank_->setScore(score);
+                    } else {
+                        for (Tank* tank: *this->otherTanks_) {
+                            if (tank->getPlayerId() == pId) {
+                                tank->setScore(score);
+                            }
+                        }
+                    }
+                }
+
+                this->isRunning_ = false;
+            } else if (static_cast<TYPES_MESSAGES>(messageType) == PLAYER_QUIT) {
+                packetReceive >> pId;
+
+                for(Tank* tank: *this->otherTanks_) {
+                    tank->lockMutex();
+
+                    if (tank->getPlayerId() == pId) {
+                        tank->setLeft(true);
+                    }
+
+                    tank->unlockMutex();
+                }
             }
-            std::unique_lock<std::mutex> loc(*this->mutex);
-            this->sendDataBool = true;
-            this->sendDataCond->notify_one();
         }
-    }
-}
-
-void Application::checkBorders() {
-    float xPosition = this->clientTank_->getSprite()->getPosition().x;
-    float yPosition = this->clientTank_->getSprite()->getPosition().y;
-
-    if (xPosition > SCREEN_WIDTH)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
-
-    if (xPosition < 0)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(0, yPosition));
-
-    if (yPosition > SCREEN_HEIGHT)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, SCREEN_HEIGHT));
-
-    if (yPosition < 0)
-        this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, 0));
-}
-
-void Application::initializeWindow() {
-    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
-    this->window_->setFramerateLimit(60);
-    this->window_->setActive(true);
-}
-
-void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
-    this->ipAddress_ = ipAddress;
-    this->port_ = port;
-    this->nameOfPlayer_.setString(playerName);
-    this->clientTank_->setPlayerName(std::move(playerName));
-    this->sendDataBool = false;
-    this->communicationWithServer();
-    this->mutex = new std::mutex();
-    this->sendDataCond = new std::condition_variable();
-    if (this->isRunning) {
-        std::thread renderingThread(&Application::render, this);
-        std::thread receivingData(&Application::receiveData, this);
-        std::thread sendingThread(&Application::sendData, this);
-        receivingData.join();
-        sendingThread.join();
-        renderingThread.join();
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
 void Application::sendData() {
     sf::Packet packetReceive = sf::Packet{};
     sf::Packet packetSend = sf::Packet{};
-    sf::IpAddress ipAddress = sf::IpAddress::Any;
+    sf::IpAddress ipAddress;
     float positionX, positionY;
     bool continueWithSending = true;
 
     while (continueWithSending) {
-        std::unique_lock<std::mutex> loc(*this->mutex);
-        while (!this->sendDataBool) {
-            this->sendDataCond->wait(loc);
+        std::unique_lock<std::mutex> loc(*this->mutex_);
+        while (!this->sendDataBool_) {
+            this->sendDataCond_->wait(loc);
         }
 
         if (this->window_ != nullptr && this->clientTank_ != nullptr) {
@@ -205,14 +561,14 @@ void Application::sendData() {
                 packetSend << (static_cast<int>(END) + 1);
                 packetSend << this->clientTank_->getPlayerId();
                 continueWithSending = false;
-            } else if (this->playerWasKilled) {
+            } else if (this->playerWasKilled_) {
                 packetSend << (static_cast<int>(KILLED) + 1);
-                packetSend << this->idOfKilledPlayer;
+                packetSend << this->idOfKilledPlayer_;
                 packetSend << this->clientTank_->getPlayerId();
-                std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer << "\n";
-                this->playerWasKilled = false;
+                std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer_ << "\n";
+                this->playerWasKilled_ = false;
                 this->clientTank_->getBullet()->resetWasFiredAndSent();
-            } else if (this->isRunning) {
+            } else if (this->isRunning_) {
                 positionX = this->clientTank_->getSprite()->getPosition().x;
                 positionY = this->clientTank_->getSprite()->getPosition().y;
 
@@ -229,171 +585,14 @@ void Application::sendData() {
                 }
             }
 
-
             if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
 
-
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
-//        std::cout << "Data were sended" << "\n";
-        this->sendDataBool = false;
+        this->sendDataBool_ = false;
     }
-    std::cout << "End of sending data\n";
-}
-
-void Application::connectToServer() {
-    this->packetSend_.clear();
-    this->packetSend_ << this->clientTank_->getPlayerName();
-    if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
-        std::cout << "Sending failed" << "\n";
-    }
-
-    sf::IpAddress ipAddress = sf::IpAddress::Any;
-    unsigned short port;
-    float tmpX, tmpY;
-    int tmpDir, tmpID, numberOfPlayers;
-    sf::Packet packetReceive = sf::Packet{};
-    packetReceive.clear();
-
-    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
-        packetReceive >> tmpX;
-        packetReceive >> tmpY;
-        packetReceive >> tmpID;
-        packetReceive >> tmpDir;
-        packetReceive >> numberOfPlayers;
-    }
-
-    switch (static_cast<DIRECTION>(tmpDir)) {
-        case UP:
-            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
-                          this->clientTank_->getSprite()->getScale().x / 2;
-            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y - 20;
-            break;
-        case DOWN:
-            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
-                          this->clientTank_->getSprite()->getScale().x / 2;
-            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y / 3 + 20;
-            break;
-        case LEFT:
-            tmpX = tmpX - this->clientTank_->getSprite()->getTexture()->getSize().x *
-                          this->clientTank_->getSprite()->getScale().x;
-            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y * 2 / 3;
-            break;
-        case RIGHT:
-            tmpY = tmpY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                          this->clientTank_->getSprite()->getScale().y * 2 / 3;
-            break;
-    }
-
-    switch (tmpID) {
-        case 2:
-            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 0, 192));
-            break;
-
-        case 3:
-            this->clientTank_->getSprite()->setColor(sf::Color(255, 0, 0, 192));
-            break;
-
-        case 4:
-            this->clientTank_->getSprite()->setColor(sf::Color(0, 255, 255, 192));
-            break;
-
-        default:
-            break;
-    }
-
-    this->clientTank_->getSprite()->setPosition(tmpX, tmpY);
-    this->clientTank_->rotate(static_cast<DIRECTION>(tmpDir));
-    this->clientTank_->setDirection(static_cast<DIRECTION>(tmpDir));
-    this->numberOfPlayers_ = numberOfPlayers;
-    this->clientTank_->setPlayerId(tmpID);
-    this->id_ = tmpID;
-
-    std::cout << "X: " << tmpX << " Y: " << tmpY << " ID: " << tmpID << "\n";
-}
-
-void Application::waitForGameSettings() {
-    sf::Packet packetReceive = sf::Packet{};
-    sf::IpAddress ipAddress = sf::IpAddress::Any;
-    unsigned short port;
-
-    int pId, direction;
-    float positionX, positionY;
-    std::string pName;
-
-    packetReceive.clear();
-
-    if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
-        std::cout << "Packet with game settings was received\n";
-
-    for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
-        packetReceive >> pId;
-        packetReceive >> pName;
-        packetReceive >> positionX;
-        packetReceive >> positionY;
-        packetReceive >> direction;
-        Tank *tmpTank = new Tank();
-        tmpTank->setPlayerId(pId);
-        tmpTank->setPlayerName(pName);
-
-        switch (static_cast<DIRECTION>(direction)) {
-            case UP:
-                break;
-            case DOWN:
-                tmpTank->setDirection(DOWN);
-                tmpTank->rotate(UP);
-                tmpTank->setDirection(DOWN);
-                break;
-            case LEFT:
-                positionX = positionX + this->clientTank_->getSprite()->getTexture()->getSize().y *
-                                        this->clientTank_->getSprite()->getScale().y -
-                            this->clientTank_->getSprite()->getTexture()->getSize().x *
-                            this->clientTank_->getSprite()->getScale().x;
-                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                                        this->clientTank_->getSprite()->getScale().y;
-                break;
-            case RIGHT:
-                positionX = positionX - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                                        this->clientTank_->getSprite()->getScale().y;
-                positionY = positionY - this->clientTank_->getSprite()->getTexture()->getSize().y *
-                                        this->clientTank_->getSprite()->getScale().y +
-                            this->clientTank_->getSprite()->getTexture()->getSize().x *
-                            this->clientTank_->getSprite()->getScale().x;
-                break;
-        }
-
-        switch (tmpTank->getPlayerId()) {
-            case 2:
-                tmpTank->getSprite()->setColor(sf::Color(0, 255, 0, 192));
-                break;
-
-            case 3:
-                tmpTank->getSprite()->setColor(sf::Color(255, 0, 0, 192));
-                break;
-
-            case 4:
-                tmpTank->getSprite()->setColor(sf::Color(0, 255, 255, 192));
-                break;
-        }
-
-        tmpTank->getSprite()->setPosition(positionX, positionY);
-        tmpTank->rotate(static_cast<DIRECTION>(direction));
-
-        this->otherTanks->push_back(tmpTank);
-//        std::cout << "OtherTank --> X: " << positionX << " Y: " << positionY << " ID: " << pId << "\n";
-    }
-
-}
-
-void Application::communicationWithServer() {
-    this->connectToServer();
-    this->updatePositionsOfTanks();
-    this->waitForGameSettings();
 }
 
 void Application::updatePositionsOfTanks() {
@@ -401,11 +600,10 @@ void Application::updatePositionsOfTanks() {
     sf::Packet packetSend = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
     unsigned short port;
-
     float positionX, positionY;
 
     if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
-        std::cout << "\n\nClient have permission to send updated position.\n";
+
     }
     packetReceive.clear();
 
@@ -420,199 +618,4 @@ void Application::updatePositionsOfTanks() {
     if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
         std::cout << "Sending failed" << "\n";
     }
-}
-
-void Application::receiveData() {
-    sf::Packet packetReceive = sf::Packet{};
-    sf::IpAddress ipAddress = sf::IpAddress::Any;
-    unsigned short port;
-
-    int pId, direction;
-    float positionX, positionY;
-    bool fired;
-    int messageType, killerId, score;
-
-    while (this->isRunning) {
-        packetReceive.clear();
-        if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done) {
-//                std::cout << "Packet with game settings was received\n";
-            packetReceive >> messageType;
-            messageType--;
-            if (static_cast<TYPES_MESSAGES>(messageType) == STATUS) {
-                for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
-                    packetReceive >> pId;
-                    packetReceive >> positionX;
-                    packetReceive >> positionY;
-                    packetReceive >> direction;
-                    packetReceive >> fired;
-
-                    for (Tank *tank: *this->otherTanks) {
-                        tank->lockMutex();
-                        if (tank->getPlayerId() == pId) {
-                            if (tank->getDirection() != direction) {
-                                tank->rotate(static_cast<DIRECTION>(direction));
-                            }
-                            tank->getSprite()->setPosition(positionX, positionY);
-                            if (fired)
-                                tank->fire();
-                        }
-                        tank->unlockMutex();
-                        std::cout << "Client: " << tank->getPlayerId() << " --> X: " << tank->getSprite()->getPosition().x
-                                  << " Y: " << tank->getSprite()->getPosition().y << "\n";
-                    }
-                }
-            } else if (static_cast<TYPES_MESSAGES>(messageType) == KILLED) {
-                packetReceive >> pId;
-                packetReceive >> positionX;
-                packetReceive >> positionY;
-                packetReceive >> direction;
-                packetReceive >> killerId;
-
-                std::cout << "Killed player: " << pId << "Killer is: " << killerId;
-
-                if (pId == this->id_) {
-                    this->clientTank_->getBullet()->setFired(false);
-                    this->clientTank_->rotate(static_cast<DIRECTION>(direction));
-                    this->clientTank_->getSprite()->setPosition(positionX, positionY);
-
-
-                } else {
-                    for(Tank* tank: *this->otherTanks) {
-                        tank->lockMutex();
-                        if (tank->getPlayerId() == pId) {
-                            tank->getBullet()->setFired(false);
-                            if (tank->getDirection() != direction) {
-                                tank->rotate(static_cast<DIRECTION>(direction));
-                            }
-                            tank->getSprite()->setPosition(positionX, positionY);
-                        }
-                        tank->unlockMutex();
-                    }
-                }
-                for(Tank* tank: *this->otherTanks) {
-                    if (tank->getPlayerId() == killerId) {
-                        tank->getBullet()->setFired(false);
-                    }
-                }
-            } else if (static_cast<TYPES_MESSAGES>(messageType) == END) {
-                std::cout << "Client got final message\n";
-                for (int i = 0; i < this->numberOfPlayers_; ++i) {
-                    packetReceive >> pId;
-                    packetReceive >> score;
-                    if (this->clientTank_->getPlayerId() == pId) {
-                        this->clientTank_->setScore(score);
-                    } else {
-                        for (Tank* tank: *this->otherTanks) {
-                            if (tank->getPlayerId() == pId)
-                                tank->setScore(score);
-                        }
-                    }
-                }
-                this->isRunning = false;
-            } else if (static_cast<TYPES_MESSAGES>(messageType) == PLAYER_QUIT) {
-                packetReceive >> pId;
-                for(Tank* tank: *this->otherTanks) {
-                    tank->lockMutex();
-                    if (tank->getPlayerId() == pId) {
-                        tank->setLeft(true);
-                    }
-                    tank->unlockMutex();
-                }
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    }
-    std::cout << "End of receiving data\n";
-}
-
-void Application::checkBulletCollision() {
-    Bullet *bullet = this->clientTank_->getBullet();
-
-    if (bullet != nullptr) {
-        if (bullet->wasFired()) {
-            float bulletPosX = bullet->getBulletPosition().x;
-            float bulletPosY = bullet->getBulletPosition().y;
-            float bulletSizeX = bullet->getBulletSize().x;
-            float bulletSizeY = bullet->getBulletSize().y;
-
-            for (Tank *tank: *this->otherTanks) {
-                float tankPosX = tank->getSprite()->getPosition().x;
-                float tankPosY = tank->getSprite()->getPosition().y;
-                float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
-                float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
-
-                if (bullet->wasFired()) {
-                    switch (tank->getDirection()) {
-                        case UP:
-                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeX &&
-                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeY) {
-                                std::cout << "Client " << tank->getPlayerId() << " was hit. (Client.getRotation()) = UP"
-                                          << std::endl;
-                                bullet->setFired(false);
-                                this->playerWasKilled = true;
-                                this->idOfKilledPlayer = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex);
-                                this->sendDataBool = true;
-                                this->sendDataCond->notify_one();
-                            }
-                            break;
-
-                        case DOWN:
-                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
-                                bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
-                                std::cout << "Client " << tank->getPlayerId()
-                                          << " was hit. (Client.getRotation()) = DOWN" << std::endl;
-                                bullet->setFired(false);
-                                this->playerWasKilled = true;
-                                this->idOfKilledPlayer = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex);
-                                this->sendDataBool = true;
-                                this->sendDataCond->notify_one();
-                            }
-                            break;
-
-                        case LEFT:
-                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
-                                bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
-                                std::cout << "Client " << tank->getPlayerId()
-                                          << " was hit. (Client.getRotation()) = LEFT" << std::endl;
-                                bullet->setFired(false);
-                                this->playerWasKilled = true;
-                                this->idOfKilledPlayer = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex);
-                                this->sendDataBool = true;
-                                this->sendDataCond->notify_one();
-                            }
-                            break;
-
-                        case RIGHT:
-                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
-                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
-                                std::cout << "Client " << tank->getPlayerId()
-                                          << " was hit. (Client.getRotation()) = RIGHT" << std::endl;
-                                bullet->setFired(false);
-                                this->playerWasKilled = true;
-                                this->idOfKilledPlayer = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex);
-                                this->sendDataBool = true;
-                                this->sendDataCond->notify_one();
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-    }
-}
-
-sf::RenderWindow *Application::getWindow() {
-    return this->window_;
-}
-
-int Application::getPlayerScore() {
-    return this->clientTank_->getScore();
-}
-
-std::vector<Tank *> *Application::getOthersTanks() {
-    return this->otherTanks;
 }

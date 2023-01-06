@@ -1,8 +1,8 @@
 //
 // Created by vrsp on 5. 1. 2023.
 //
-
 #include "Button.h"
+
 
 Button::Button(sf::Vector2f size, sf::Color bgColor, std::string text, int characterSize, sf::Color textColor) {
     this->text_.setString(text);
@@ -30,6 +30,7 @@ void Button::setPosition(sf::Vector2f position) {
 
     float xPos = (position.x + this->button_.getLocalBounds().width / 2) - this->text_.getLocalBounds().width / 2;
     float yPos = (position.y + this->button_.getLocalBounds().height / 2) - this->text_.getLocalBounds().height * 2 / 3;
+
     this->text_.setPosition(xPos, yPos);
 }
 
@@ -53,5 +54,6 @@ bool Button::isMouseOver(sf::RenderWindow &window) {
     if (mouseX >= btnX && mouseX <= btnX + btnSizeX && mouseY >= btnY && mouseY <= btnY + btnSizeY) {
         return true;
     }
+
     return false;
 }

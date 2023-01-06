@@ -20,8 +20,8 @@ public:
     bool isMouseOver(sf::RenderWindow &window);
 
 private:
-    sf::RectangleShape button_;
     sf::Text text_;
+    sf::RectangleShape button_;
 };
 
 

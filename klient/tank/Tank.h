@@ -1,13 +1,14 @@
+#pragma once
 //
 // Created by vrsp on 28. 12. 2022.
 //
-
-#ifndef KLIENT_TANK_H
-#define KLIENT_TANK_H
 #include <SFML/Graphics.hpp>
 #include <chrono>
 #include <mutex>
 #include "../bullet/Bullet.h"
+
+#ifndef KLIENT_TANK_H
+#define KLIENT_TANK_H
 
 
 class Tank {
@@ -20,43 +21,36 @@ public:
     void moveLeft();
     void moveRight();
     void fire();
-
     void rotate(DIRECTION dir);
 
     void render(sf::RenderWindow& renderer);
 
-    sf::Sprite * getSprite();
-
-    int getDirection();
-    void setDirection(DIRECTION dir);
-    double getSpeed() const;
-    double getReloadTime();
-
-    int getPlayerId() const;
-    void setPlayerId(int pId);
-    void setLeft(bool left);
-    bool getLeft();
-
-    void setScore(int score);
-    int getScore();
-
     void lockMutex();
     void unlockMutex();
 
+    void setDirection(DIRECTION dir);
+    void setPlayerId(int pId);
     void setPlayerName(std::string name);
-    std::string getPlayerName();
+    void setLeft(bool left);
+    void setScore(int score);
 
+    sf::Sprite * getSprite();
+    int getDirection();
+    int getPlayerId() const;
+    std::string getPlayerName();
     Bullet* getBullet();
+    bool getLeft();
+    int getScore();
 
 private:
-    int playerId;
+    int playerId_;
+    std::string playerName_;
     bool left_;
     int score_;
-    std::string playerName;
 
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;
-    std::mutex mutex;
+    std::mutex mutex_;
 
     Bullet* bullet_;
     float speed_;

@@ -1,8 +1,8 @@
 //
 // Created by vrsp on 5. 1. 2023.
 //
-
 #include "ShowScore.h"
+
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
@@ -46,12 +46,6 @@ ShowScore::~ShowScore() {
     this->window_ = nullptr;
 }
 
-void ShowScore::initializeWindow() {
-    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
-    this->window_->setFramerateLimit(60);
-    this->window_->setActive(true);
-}
-
 void ShowScore::render() {
     this->initializeWindow();
 
@@ -77,4 +71,10 @@ void ShowScore::render() {
 
     this->window_->setActive(false);
     this->window_->close();
+}
+
+void ShowScore::initializeWindow() {
+    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
+    this->window_->setFramerateLimit(60);
+    this->window_->setActive(true);
 }

@@ -2,6 +2,8 @@
 // Created by filip on 5. 1. 2023.
 //
 #include "Menu.h"
+
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
@@ -144,12 +146,13 @@ void Menu::render() {
             }
         }
     }
+
     this->window_->setActive(false);
     this->window_->close();
 }
 
-std::string Menu::getName() {
-    return this->textboxes_->at(0)->getText();
+bool Menu::getAppClosed() {
+    return this->appClosed_;
 }
 
 sf::IpAddress Menu::getIpAddress() {
@@ -161,8 +164,8 @@ int Menu::getPort() {
     return std::stoi(port);
 }
 
-bool Menu::getAppClosed() {
-    return this->appClosed_;
+std::string Menu::getName() {
+    return this->textboxes_->at(0)->getText();
 }
 
 void Menu::initializeWindow() {

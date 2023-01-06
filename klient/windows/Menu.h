@@ -15,13 +15,13 @@ public:
     Menu();
     ~Menu();
 
-    void initializeWindow();
     void render();
 
-    std::string getName();
+    bool getAppClosed();
     sf::IpAddress getIpAddress();
     int getPort();
-    bool getAppClosed();
+    std::string getName();
+
 private:
     bool gameStarted_;
     bool appClosed_;
@@ -38,6 +38,8 @@ private:
 
     std::vector<Textbox*>* textboxes_;
     Button* button_;
+
+    void initializeWindow();
 };
 
 
