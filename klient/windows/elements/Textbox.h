@@ -20,11 +20,11 @@ public:
     void setLimit(bool hasLimit);
     void setLimit(int limit);
     void setSelected(bool isSelected);
+    void setInitialText(std::string text);
+    void typed(sf::Event event);
     std::string getText();
     sf::Text getTextBox();
     bool isSelected();
-    void typed(sf::Event event);
-    void setInitialText(std::string text);
 
 private:
     sf::Text textBox_;

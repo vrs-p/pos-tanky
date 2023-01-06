@@ -2,6 +2,8 @@
 // Created by filip on 5. 1. 2023.
 //
 #include "Menu.h"
+
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
@@ -9,6 +11,7 @@ Menu::Menu() {
     float xPosition = 50.0;
     float xSpace = 100.0;
     this->gameStarted_ = false;
+    this->appClosed_ = false;
     this->font_.loadFromFile("../font/consola.ttf");
 
     this->textMainMenu_.setFont(this->font_);
@@ -75,7 +78,7 @@ Menu::~Menu() {
 void Menu::render() {
     this->initializeWindow();
 
-    while (!this->gameStarted_) {
+    while (!this->gameStarted_ && !this->appClosed_) {
         this->window_->clear();
 
         this->window_->draw(this->textMainMenu_);
@@ -115,6 +118,10 @@ void Menu::render() {
                             }
                         }
                         break;
+
+                    case sf::Keyboard::Escape:
+                        this->appClosed_ = true;
+                        break;
                 }
             } else if (event.type == sf::Event::TextEntered) {
                 for (Textbox* textbox : *this->textboxes_) {
@@ -134,15 +141,18 @@ void Menu::render() {
                 if (this->button_->isMouseOver(*this->window_)) {
                     this->gameStarted_ = true;
                 }
+            } else if (event.type == sf::Event::Closed) {
+                this->appClosed_ = true;
             }
         }
     }
+
     this->window_->setActive(false);
     this->window_->close();
 }
 
-std::string Menu::getName() {
-    return this->textboxes_->at(0)->getText();
+bool Menu::getAppClosed() {
+    return this->appClosed_;
 }
 
 sf::IpAddress Menu::getIpAddress() {
@@ -152,6 +162,10 @@ sf::IpAddress Menu::getIpAddress() {
 int Menu::getPort() {
     std::string port = this->textboxes_->at(2)->getText();
     return std::stoi(port);
+}
+
+std::string Menu::getName() {
+    return this->textboxes_->at(0)->getText();
 }
 
 void Menu::initializeWindow() {

@@ -1,3 +1,4 @@
+#pragma once
 //
 // Created by filip on 28. 12. 2022.
 //
@@ -13,24 +14,23 @@ public:
     Bullet();
     ~Bullet();
 
-    bool wasFired() const;
-    bool wasFiredAndSent() const;
+    void render(sf::RenderWindow& renderer);
+    void shotBullet(float xPosition, float yPosition, DIRECTION direction);
+    void setFired(bool fired);
     void setWasFiredAndSent();
     void resetWasFiredAndSent();
-    void setFired(bool fired);
-    void shotBullet(float xPosition, float yPosition, DIRECTION direction);
-    void moveBullet();
-    void render(sf::RenderWindow& renderer);
-
-    sf::RectangleShape* getBulletIcon();
-
     sf::Vector2f getBulletPosition();
     sf::Vector2f getBulletSize();
+    bool wasFired() const;
+    bool wasFiredAndSent() const;
+
 private:
-    sf::RectangleShape* bulletIcon_;
     float speed_;
+    int diameter_;
+    sf::RectangleShape* bulletIcon_;
     bool fired_;
     bool firedAndSent_;
-    int diameter_;
     DIRECTION direction_;
+
+    void moveBullet();
 };

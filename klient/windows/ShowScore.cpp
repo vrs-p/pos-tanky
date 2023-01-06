@@ -1,8 +1,8 @@
 //
 // Created by vrsp on 5. 1. 2023.
 //
-
 #include "ShowScore.h"
+
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
@@ -46,12 +46,6 @@ ShowScore::~ShowScore() {
     this->window_ = nullptr;
 }
 
-void ShowScore::initializeWindow() {
-    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
-    this->window_->setFramerateLimit(60);
-    this->window_->setActive(true);
-}
-
 void ShowScore::render() {
     this->initializeWindow();
 
@@ -67,10 +61,20 @@ void ShowScore::render() {
         while (this->window_->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 this->showScore_ = false;
+            } else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::Escape) {
+                    this->showScore_ = false;
+                }
             }
         }
     }
 
     this->window_->setActive(false);
     this->window_->close();
+}
+
+void ShowScore::initializeWindow() {
+    this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
+    this->window_->setFramerateLimit(60);
+    this->window_->setActive(true);
 }
