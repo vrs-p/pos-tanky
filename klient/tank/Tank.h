@@ -43,12 +43,16 @@ public:
     void lockMutex();
     void unlockMutex();
 
+    void setPlayerName(std::string name);
+    std::string getPlayerName();
+
     Bullet* getBullet();
 
 private:
     int playerId;
     bool left_;
     int score_;
+    std::string playerName;
 
     sf::Texture* tankTexture_;
     sf::Sprite* tankSprite_;

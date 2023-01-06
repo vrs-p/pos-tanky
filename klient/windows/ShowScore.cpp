@@ -33,7 +33,7 @@ ShowScore::ShowScore(int playerScore, std::vector<Tank*>* otherTanks) {
     this->textOthersScore_.setFillColor(sf::Color::White);
     std::string stringOthersScore;
     for (Tank* tank: *otherTanks) {
-        this->stringOthersScore_.append("Score of player " + std::to_string(tank->getPlayerId()) + " is: " + std::to_string(tank->getScore()) + "\n");
+        this->stringOthersScore_.append("Score of player " + tank->getPlayerName() + " is: " + std::to_string(tank->getScore()) + "\n");
     }
     this->textOthersScore_.setString(this->stringOthersScore_);
     this->textOthersScore_.setPosition(sf::Vector2f((SCREEN_WIDTH - this->textOthersScore_.getLocalBounds().width) / 2, SCREEN_HEIGHT / 2 + this->textYourScore_.getLocalBounds().height * 2));

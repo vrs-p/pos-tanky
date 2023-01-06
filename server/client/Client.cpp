@@ -4,8 +4,11 @@
 
 #include "Client.h"
 
-Client::Client(int id, float xPosition, float yPosition, DIRECTION direction, unsigned short port, sf::IpAddress ipAddress) {
+#include <utility>
+
+Client::Client(int id, std::string pName, float xPosition, float yPosition, DIRECTION direction, unsigned short port, sf::IpAddress ipAddress) {
     this->id_ = id;
+    this->playerName = std::move(pName);
     this->position_ = new POSITION;
     this->connection_ = new CONNECTION;
     this->position_->xPosition_ = xPosition;
@@ -116,6 +119,10 @@ void Client::lockMutex() {
 
 void Client::unlockMutex() {
     this->mutex_.unlock();
+}
+
+std::string Client::getPlayerName() {
+    return this->playerName;
 }
 
 

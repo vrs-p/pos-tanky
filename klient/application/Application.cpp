@@ -4,6 +4,8 @@
 
 #include "Application.h"
 
+#include <utility>
+
 
 Application::Application() {
     this->isRunning = true;
@@ -125,9 +127,10 @@ void Application::initializeWindow() {
     this->window_->setActive(true);
 }
 
-void Application::run(sf::IpAddress ipAddress, int port) {
+void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
     this->ipAddress_ = ipAddress;
     this->port_ = port;
+    this->clientTank_->setPlayerName(std::move(playerName));
     this->sendDataBool = false;
     this->communicationWithServer();
     this->mutex = new std::mutex();
@@ -202,6 +205,7 @@ void Application::sendData() {
 
 void Application::connectToServer() {
     this->packetSend_.clear();
+    this->packetSend_ << this->clientTank_->getPlayerName();
     if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
         std::cout << "Sending failed" << "\n";
     }
@@ -280,6 +284,7 @@ void Application::waitForGameSettings() {
 
     int pId, direction;
     float positionX, positionY;
+    std::string pName;
 
     packetReceive.clear();
 
@@ -288,11 +293,13 @@ void Application::waitForGameSettings() {
 
     for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
         packetReceive >> pId;
+        packetReceive >> pName;
         packetReceive >> positionX;
         packetReceive >> positionY;
         packetReceive >> direction;
         Tank *tmpTank = new Tank();
         tmpTank->setPlayerId(pId);
+        tmpTank->setPlayerName(pName);
 
         switch (static_cast<DIRECTION>(direction)) {
             case UP:
@@ -563,7 +570,7 @@ sf::RenderWindow *Application::getWindow() {
 }
 
 int Application::getPlayerScore() {
-    return this->clientTank_->getPlayerId();
+    return this->clientTank_->getScore();
 }
 
 std::vector<Tank *> *Application::getOthersTanks() {

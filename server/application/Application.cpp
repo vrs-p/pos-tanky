@@ -71,8 +71,11 @@ void Application::waitForClients() {
         unsigned short tmpPort;
         sf::IpAddress tmpIp = sf::IpAddress::Any;
         DIRECTION tmpDir;
+        std::string pName;
 
+        this->packetReceive_.clear();
         if (this->socket_.receive(this->packetReceive_, tmpIp, tmpPort) == sf::Socket::Done) {
+            this->packetReceive_ >> pName;
             std::cout << "Client was connected\n";
         }
         this->packetSend_.clear();
@@ -114,7 +117,7 @@ void Application::waitForClients() {
         this->packetSend_ << n;
         std::cout << "Sending packet on IP: " << tmpIp.toString() << " With port: " << tmpPort << "\n";
 
-        Client *tmpClient = new Client(count + 1, positionX, positionY, tmpDir, tmpPort, tmpIp);
+        Client *tmpClient = new Client(count + 1, pName, positionX, positionY, tmpDir, tmpPort, tmpIp);
         this->clients_->push_back(tmpClient);
         count++;
 
@@ -170,6 +173,7 @@ void Application::initializeGame() {
         for (Client *clientInfo: *this->clients_) {
             if (clientInfo->getClientId() != client->getClientId()) {
                 this->packetSend_ << clientInfo->getClientId();
+                this->packetSend_ << clientInfo->getPlayerName();
                 this->packetSend_ << clientInfo->getPosition()->xPosition_;
                 this->packetSend_ << clientInfo->getPosition()->yPosition_;
                 this->packetSend_ << static_cast<int>(clientInfo->getPosition()->direction_);

@@ -23,7 +23,7 @@ struct POSITION {
 
 class Client {
 public:
-    Client(int id, float xPosition, float yPosition, DIRECTION direction, unsigned short port, sf::IpAddress ipAddress);
+    Client(int id, std::string pName, float xPosition, float yPosition, DIRECTION direction, unsigned short port, sf::IpAddress ipAddress);
     ~Client();
 
     void updatePosition(float xPosition, float yPosition, DIRECTION direction);
@@ -46,6 +46,7 @@ public:
     bool wasScoreSent();
     bool setScoreWasSent(bool sent);
     int getScore();
+    std::string getPlayerName();
 
     void lockMutex();
     void unlockMutex();
@@ -58,6 +59,7 @@ private:
     bool fired_;
     bool killed_;
     bool scoreWasSent_;
+    std::string playerName;
     CONNECTION* connection_;
     POSITION* position_;
     POSITION* initialPosition_;

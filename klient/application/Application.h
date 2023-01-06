@@ -45,7 +45,7 @@ public:
     void communicationWithServer();
     void updatePositionsOfTanks();
 
-    void run(sf::IpAddress ipAddress, int port);
+    void run(sf::IpAddress ipAddress, int port, std::string playerName);
 
     void sendData();
     void receiveData();

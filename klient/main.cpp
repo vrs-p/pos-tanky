@@ -11,7 +11,7 @@ int main(int argc, char* args[]) {
     Application* app = new Application();
     Menu* menu = new Menu();
     menu->render();
-    app->run(menu->getIpAddress(), menu->getPort());
+    app->run(menu->getIpAddress(), menu->getPort(), menu->getName());
     ShowScore* showScore = new ShowScore(app->getPlayerScore(), app->getOthersTanks());
     showScore->render();
 

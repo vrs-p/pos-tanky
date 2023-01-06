@@ -220,3 +220,11 @@ void Tank::lockMutex() {
 void Tank::unlockMutex() {
     this->mutex.unlock();
 }
+
+void Tank::setPlayerName(std::string name) {
+    this->playerName = name;
+}
+
+std::string Tank::getPlayerName() {
+    return this->playerName;
+}
