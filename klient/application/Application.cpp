@@ -43,6 +43,7 @@ Application::~Application() {
 
 void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
     this->ipAddress_ = ipAddress;
+    this->port_ = port;
     this->sendDataBool_ = false;
     this->nameOfPlayer_.setString(playerName);
     this->clientTank_->setPlayerName(std::move(playerName));
@@ -79,7 +80,7 @@ void Application::communicationWithServer() {
 void Application::connectToServer() {
     this->packetSend_.clear();
     this->packetSend_ << this->clientTank_->getPlayerName();
-    if (this->socket_.send(this->packetSend_, this->ipAddress_, 13877) != sf::Socket::Done) {
+    if (this->socket_.send(this->packetSend_, this->ipAddress_, this->port_) != sf::Socket::Done) {
         std::cout << "Sending failed" << "\n";
     }
 
@@ -585,7 +586,7 @@ void Application::sendData() {
                 }
             }
 
-            if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
+            if (this->socket_.send(packetSend, this->ipAddress_, this->port_) != sf::Socket::Done) {
                 std::cout << "Sending failed" << "\n";
             }
 
@@ -615,7 +616,7 @@ void Application::updatePositionsOfTanks() {
     packetSend << positionX;
     packetSend << positionY;
     packetSend << static_cast<int>(this->clientTank_->getDirection());
-    if (this->socket_.send(packetSend, this->ipAddress_, 13877) != sf::Socket::Done) {
+    if (this->socket_.send(packetSend, this->ipAddress_, this->port_) != sf::Socket::Done) {
         std::cout << "Sending failed" << "\n";
     }
 }
