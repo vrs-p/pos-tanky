@@ -1,6 +1,7 @@
 //
 // Created by filip on 5. 1. 2023.
 //
+#include <regex>
 #include "Menu.h"
 
 
@@ -52,7 +53,7 @@ Menu::Menu() {
     this->textboxes_->at(2)->setPosition(sf::Vector2f(this->portText_.getLocalBounds().width + xSpace, SCREEN_HEIGHT / 2 - this->portText_.getLocalBounds().height * 4));
     this->textboxes_->at(2)->setLimit(5);
 
-    this->button_ = new Button(sf::Vector2f(200, 50), sf::Color(0, 255, 0), "Play", 24, sf::Color::Black);
+    this->button_ = new Button(sf::Vector2f(200, 50), sf::Color(192, 192, 192), "Play", 24, sf::Color::Black);
     this->button_->setFont(this->font_);
     this->button_->setPosition(sf::Vector2f(SCREEN_WIDTH - this->button_->getButton().getSize().x - 100, this->portText_.getPosition().y + this->portText_.getLocalBounds().height + 50));
 
@@ -90,6 +91,7 @@ void Menu::render() {
             this->window_->draw(textbox->getTextBox());
         }
 
+        this->validate();
         this->window_->draw(this->button_->getButton());
         this->window_->draw(this->button_->getText());
 
@@ -129,7 +131,7 @@ void Menu::render() {
                         textbox->typed(event);
                     }
                 }
-            } else if (event.type == sf::Event::MouseMoved) {
+            } else if (event.type == sf::Event::MouseMoved && this->validate()) {
                 if (this->button_->isMouseOver(*this->window_)) {
                     this->button_->setBgColor(sf::Color(0, 153, 0));
                     this->button_->setTextColor(sf::Color::White);
@@ -138,7 +140,7 @@ void Menu::render() {
                     this->button_->setTextColor(sf::Color::Black);
                 }
             } else if (event.type == sf::Event::MouseButtonPressed) {
-                if (this->button_->isMouseOver(*this->window_)) {
+                if (this->button_->isMouseOver(*this->window_) && this->validate()) {
                     this->gameStarted_ = true;
                 }
             } else if (event.type == sf::Event::Closed) {
@@ -172,4 +174,20 @@ void Menu::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
     this->window_->setFramerateLimit(60);
     this->window_->setActive(true);
+}
+
+bool Menu::validate() {
+    if (!this->textboxes_->at(0)->getText().empty() && std::regex_match(this->textboxes_->at(1)->getText(), std::regex("^(?:25[0-5]|2[0-4]\\d|[0-1]?\\d{1,2})(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d{1,2})){3}$")) && std::regex_match(this->textboxes_->at(2)->getText(), std::regex("[0-9]+"))) {
+        if (this->button_->isMouseOver(*this->window_)){
+            this->button_->setBgColor(sf::Color(0, 153, 0));
+            this->button_->setTextColor(sf::Color::White);
+        } else {
+            this->button_->setBgColor(sf::Color(0, 255, 0));
+            this->button_->setTextColor(sf::Color::Black);
+        }
+        return true;
+    }
+    this->button_->setBgColor(sf::Color(192, 192, 192));
+    this->button_->setTextColor(sf::Color::Black);
+    return false;
 }

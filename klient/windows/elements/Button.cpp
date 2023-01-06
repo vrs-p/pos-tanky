@@ -11,6 +11,8 @@ Button::Button(sf::Vector2f size, sf::Color bgColor, std::string text, int chara
 
     this->button_.setSize(size);
     this->button_.setFillColor(bgColor);
+
+    this->clickable_ = false;
 }
 
 void Button::setFont(sf::Font &font) {
@@ -32,6 +34,10 @@ void Button::setPosition(sf::Vector2f position) {
     float yPos = (position.y + this->button_.getLocalBounds().height / 2) - this->text_.getLocalBounds().height * 2 / 3;
 
     this->text_.setPosition(xPos, yPos);
+}
+
+void Button::setClickable(bool isClickable) {
+    this->clickable_ = isClickable;
 }
 
 sf::RectangleShape Button::getButton() {
@@ -56,4 +62,8 @@ bool Button::isMouseOver(sf::RenderWindow &window) {
     }
 
     return false;
+}
+
+bool Button::isClickable() {
+    return this->clickable_;
 }

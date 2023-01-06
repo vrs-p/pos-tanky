@@ -40,6 +40,7 @@ private:
     Button* button_;
 
     void initializeWindow();
+    bool validate();
 };
 
 
