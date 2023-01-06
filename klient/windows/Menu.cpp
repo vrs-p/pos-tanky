@@ -9,6 +9,7 @@ Menu::Menu() {
     float xPosition = 50.0;
     float xSpace = 100.0;
     this->gameStarted_ = false;
+    this->appClosed_ = false;
     this->font_.loadFromFile("../font/consola.ttf");
 
     this->textMainMenu_.setFont(this->font_);
@@ -75,7 +76,7 @@ Menu::~Menu() {
 void Menu::render() {
     this->initializeWindow();
 
-    while (!this->gameStarted_) {
+    while (!this->gameStarted_ && !this->appClosed_) {
         this->window_->clear();
 
         this->window_->draw(this->textMainMenu_);
@@ -115,6 +116,10 @@ void Menu::render() {
                             }
                         }
                         break;
+
+                    case sf::Keyboard::Escape:
+                        this->appClosed_ = true;
+                        break;
                 }
             } else if (event.type == sf::Event::TextEntered) {
                 for (Textbox* textbox : *this->textboxes_) {
@@ -134,6 +139,8 @@ void Menu::render() {
                 if (this->button_->isMouseOver(*this->window_)) {
                     this->gameStarted_ = true;
                 }
+            } else if (event.type == sf::Event::Closed) {
+                this->appClosed_ = true;
             }
         }
     }
@@ -152,6 +159,10 @@ sf::IpAddress Menu::getIpAddress() {
 int Menu::getPort() {
     std::string port = this->textboxes_->at(2)->getText();
     return std::stoi(port);
+}
+
+bool Menu::getAppClosed() {
+    return this->appClosed_;
 }
 
 void Menu::initializeWindow() {

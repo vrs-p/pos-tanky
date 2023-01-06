@@ -8,15 +8,18 @@
 //const int SCREEN_HEIGHT = 800;
 
 int main(int argc, char* args[]) {
-    Application* app = new Application();
     Menu* menu = new Menu();
     menu->render();
-    app->run(menu->getIpAddress(), menu->getPort(), menu->getName());
-    ShowScore* showScore = new ShowScore(app->getPlayerScore(), app->getOthersTanks());
-    showScore->render();
+
+    if (!menu->getAppClosed()) {
+        Application* app = new Application();
+        app->run(menu->getIpAddress(), menu->getPort(), menu->getName());
+        ShowScore* showScore = new ShowScore(app->getPlayerScore(), app->getOthersTanks());
+        showScore->render();
+        delete app;
+        delete showScore;
+    }
 
     delete menu;
-    delete app;
-    delete showScore;
     return 0;
 }

@@ -21,8 +21,10 @@ public:
     std::string getName();
     sf::IpAddress getIpAddress();
     int getPort();
+    bool getAppClosed();
 private:
     bool gameStarted_;
+    bool appClosed_;
 
     sf::Font font_;
     sf::Text textMainMenu_;

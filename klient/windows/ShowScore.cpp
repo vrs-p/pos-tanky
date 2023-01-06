@@ -67,6 +67,10 @@ void ShowScore::render() {
         while (this->window_->pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 this->showScore_ = false;
+            } else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Q || event.key.code == sf::Keyboard::Escape) {
+                    this->showScore_ = false;
+                }
             }
         }
     }
