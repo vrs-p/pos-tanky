@@ -2,7 +2,6 @@
 klient/.idea
 klient/cmake-build-debug
 klient/cmake-build-debug-mingw
-klient/src
 
 # server
 server/.idea
