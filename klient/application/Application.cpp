@@ -4,7 +4,9 @@
 #include <utility>
 #include "Application.h"
 
-
+/**
+ * Constructor for Application class
+ */
 Application::Application() {
     this->packetSend_ = sf::Packet{};
     this->id_ = 0;
@@ -20,6 +22,9 @@ Application::Application() {
     this->otherTanks_ = new std::vector<Tank *>();
 }
 
+/**
+ * Destructor for Application class
+ */
 Application::~Application() {
     delete this->mutex_;
     this->mutex_ = nullptr;
@@ -41,6 +46,10 @@ Application::~Application() {
     this->otherTanks_ = nullptr;
 }
 
+/**
+ * By calling this method you are able to start main program
+ * You'll also initialize communication with server and whole game
+ */
 void Application::run(sf::IpAddress ipAddress, int port, std::string playerName) {
     this->ipAddress_ = ipAddress;
     this->port_ = port;
@@ -63,20 +72,37 @@ void Application::run(sf::IpAddress ipAddress, int port, std::string playerName)
     }
 }
 
+/**
+ * Getter for score of player
+ * @return score of player
+ */
 int Application::getPlayerScore() {
     return this->clientTank_->getScore();
 }
 
+/**
+ * Getter for list of other players
+ * @return list of oponents
+ */
 std::vector<Tank *> *Application::getOthersTanks() {
     return this->otherTanks_;
 }
 
+/**
+ * By calling this function you'll initialize communication with server
+ * You'll connect to server
+ * Receive ID, position and direction of your tank
+ * Receive IDs, positions and directions of your oponents
+ */
 void Application::communicationWithServer() {
     this->connectToServer();
     this->updatePositionsOfTanks();
     this->waitForGameSettings();
 }
 
+/**
+ * By calling this function you'll connect to server
+ */
 void Application::connectToServer() {
     this->packetSend_.clear();
     this->packetSend_ << this->clientTank_->getPlayerName();
@@ -154,6 +180,10 @@ void Application::connectToServer() {
     std::cout << "X: " << tmpX << " Y: " << tmpY << " ID: " << tmpID << "\n";
 }
 
+/**
+ * By calling this function you'll wait for game settings
+ * Like number of opponents and information about them
+ */
 void Application::waitForGameSettings() {
     sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
@@ -228,6 +258,11 @@ void Application::waitForGameSettings() {
 
 }
 
+/**
+ * Thread function used for rendering game
+ * You'll read input from player update his location
+ * and render yours and other players tanks
+ */
 void Application::render() {
     this->initializeWindow();
     this->window_->setActive(true);
@@ -243,12 +278,19 @@ void Application::render() {
     this->window_->close();
 }
 
+/**
+ * By calling this function you'll initialize graphic window for game
+ */
 void Application::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
     this->window_->setFramerateLimit(60);
     this->window_->setActive(true);
 }
 
+/**
+ * By calling this function you'll read client input
+ * if he pressed any key it'll update his status
+ */
 void Application::readClientInput() {
     sf::Event event;
     while (this->window_->pollEvent(event)) {
@@ -292,6 +334,9 @@ void Application::readClientInput() {
     }
 }
 
+/**
+ * By calling this function it'll check if tank is not outside of borders
+ */
 void Application::checkBorders() {
     float xPosition = this->clientTank_->getSprite()->getPosition().x;
     float yPosition = this->clientTank_->getSprite()->getPosition().y;
@@ -313,6 +358,9 @@ void Application::checkBorders() {
     }
 }
 
+/**
+ * By calling this function you'll check if your bullet hit some other player
+ */
 void Application::checkBulletCollision() {
     Bullet *bullet = this->clientTank_->getBullet();
 
@@ -385,6 +433,9 @@ void Application::checkBulletCollision() {
     }
 }
 
+/**
+ * By calling this function you'll render tank and name of player
+ */
 void Application::draw() {
     this->window_->clear();
 
@@ -434,6 +485,10 @@ void Application::draw() {
     this->window_->display();
 }
 
+/**
+ * Thread function.
+ * Function for receiving data from server
+ */
 void Application::receiveData() {
     sf::Packet packetReceive = sf::Packet{};
     sf::IpAddress ipAddress = sf::IpAddress::Any;
@@ -542,6 +597,10 @@ void Application::receiveData() {
     }
 }
 
+/**
+ * Thread function.
+ * Function for sending data to server.
+ */
 void Application::sendData() {
     sf::Packet packetReceive = sf::Packet{};
     sf::Packet packetSend = sf::Packet{};
@@ -596,6 +655,9 @@ void Application::sendData() {
     }
 }
 
+/**
+ * By calling this function you'll send specific initial position to server
+ */
 void Application::updatePositionsOfTanks() {
     sf::Packet packetReceive = sf::Packet{};
     sf::Packet packetSend = sf::Packet{};

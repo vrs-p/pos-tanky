@@ -3,7 +3,9 @@
 //
 #include "Bullet.h"
 
-
+/**
+ * Constructor for Bullet class
+ */
 Bullet::Bullet() {
     this->speed_ = 15;
     this->diameter_ = 4;
@@ -12,11 +14,18 @@ Bullet::Bullet() {
     this->firedAndSent_ = false;
 }
 
+/**
+ * Destructor for bullet class
+ */
 Bullet::~Bullet() {
     delete this->bulletIcon_;
     this->bulletIcon_ = nullptr;
 }
 
+/**
+ * By calling this function you'll render bullet in window
+ * @param window window in which we want to render bullet
+ */
 void Bullet::render(sf::RenderWindow &window) {
     float xPosition = this->bulletIcon_->getPosition().x;
     float yPosition = this->bulletIcon_->getPosition().y;
@@ -30,6 +39,12 @@ void Bullet::render(sf::RenderWindow &window) {
     }
 }
 
+/**
+ * By calling this function you'll initialize bullets position and direction
+ * @param xPosition X axis position of bullet
+ * @param yPosition Y axis position of bullet
+ * @param direction direction of bullet
+ */
 void Bullet::shotBullet(float xPosition, float yPosition, DIRECTION direction) {
     switch (direction) {
         case UP:
@@ -47,34 +62,63 @@ void Bullet::shotBullet(float xPosition, float yPosition, DIRECTION direction) {
     this->direction_ = direction;
 }
 
+/**
+ * Setter for information if bullet was fired
+ * @param fired if bullet was fired
+ */
 void Bullet::setFired(bool fired) {
     this->fired_ = fired;
 }
 
+/**
+ * Setter for information that data about fired bullet were sent
+ */
 void Bullet::setWasFiredAndSent() {
     this->firedAndSent_ = true;
 }
 
+/**
+ * By calling this function you'll set firedAndSent_ to false
+ */
 void Bullet::resetWasFiredAndSent() {
     this->firedAndSent_ = false;
 }
 
+/**
+ * By calling this function you'll get position of bullet
+ * @return position of bullet
+ */
 sf::Vector2f Bullet::getBulletPosition() {
     return this->bulletIcon_->getPosition();
 }
 
+/**
+ * By calling this function you'll get size of bullet
+ * @return size of bullet
+ */
 sf::Vector2f Bullet::getBulletSize() {
     return this->bulletIcon_->getSize();
 }
 
+/**
+ * Getter for information if bullet was fired
+ * @return if bullet was fired
+ */
 bool Bullet::wasFired() const {
     return this->fired_;
 }
 
+/**
+ * Getter for information of data about fired bullet were sent
+ * @return
+ */
 bool Bullet::wasFiredAndSent() const {
     return this->firedAndSent_;
 }
 
+/**
+ * By calling this function you'll move bullet in its direction
+ */
 void Bullet::moveBullet() {
     if (this->direction_ == UP){
         this->bulletIcon_->move(sf::Vector2f(0.0f, -this->speed_));

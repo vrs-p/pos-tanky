@@ -8,6 +8,9 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
+/**
+ * Constructor for Menu class
+ */
 Menu::Menu() {
     float xPosition = 50.0;
     float xSpace = 100.0;
@@ -61,6 +64,9 @@ Menu::Menu() {
     this->textboxes_->at(2)->setInitialText("13877");
 }
 
+/**
+ * Destructor for Menu class
+ */
 Menu::~Menu() {
     delete this->window_;
     this->window_ = nullptr;
@@ -76,6 +82,10 @@ Menu::~Menu() {
     this->button_ = nullptr;
 }
 
+/**
+ * By calling this function you'll initialize window and render main menu to player
+ * He'll be able to set name, IP address of server and port
+ */
 void Menu::render() {
     this->initializeWindow();
 
@@ -153,29 +163,51 @@ void Menu::render() {
     this->window_->close();
 }
 
+/**
+ * Getter for information if menu was closed
+ * @return
+ */
 bool Menu::getAppClosed() {
     return this->appClosed_;
 }
 
+/**
+ * Getter for IP address
+ * @return IP address
+ */
 sf::IpAddress Menu::getIpAddress() {
     return this->textboxes_->at(1)->getText();
 }
 
+/**
+ * Getter for port
+ * @return port
+ */
 int Menu::getPort() {
     std::string port = this->textboxes_->at(2)->getText();
     return std::stoi(port);
 }
 
+/**
+ * Getter for name of player
+ */
 std::string Menu::getName() {
     return this->textboxes_->at(0)->getText();
 }
 
+/**
+ * By calling this function you'll initialize window
+ */
 void Menu::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
     this->window_->setFramerateLimit(60);
     this->window_->setActive(true);
 }
 
+/**
+ * By calling this function you'll validate player inputs
+ * @return if all inputs are valid
+ */
 bool Menu::validate() {
     if (!this->textboxes_->at(0)->getText().empty() && std::regex_match(this->textboxes_->at(1)->getText(), std::regex("^(?:25[0-5]|2[0-4]\\d|[0-1]?\\d{1,2})(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d{1,2})){3}$")) && std::regex_match(this->textboxes_->at(2)->getText(), std::regex("[0-9]+"))) {
         if (this->button_->isMouseOver(*this->window_)){

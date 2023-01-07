@@ -7,6 +7,11 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
+/**
+ * Constructor for ShowScore class which will display statistics of game
+ * @param playerScore score of player
+ * @param otherTanks list of other tanks
+ */
 ShowScore::ShowScore(int playerScore, std::vector<Tank*>* otherTanks) {
     this->font_.loadFromFile("../font/consola.ttf");
 
@@ -41,11 +46,18 @@ ShowScore::ShowScore(int playerScore, std::vector<Tank*>* otherTanks) {
     this->showScore_ = true;
 }
 
+/**
+ * Destructor for ShowScore class
+ */
 ShowScore::~ShowScore() {
     delete this->window_;
     this->window_ = nullptr;
 }
 
+/**
+ * By calling this function you'll initialize window and render yours
+ * and other players score
+ */
 void ShowScore::render() {
     this->initializeWindow();
 
@@ -73,6 +85,9 @@ void ShowScore::render() {
     this->window_->close();
 }
 
+/**
+ * By calling this function you'll initialize window
+ */
 void ShowScore::initializeWindow() {
     this->window_ = new sf::RenderWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "POS-Tanks", sf::Style::Close);
     this->window_->setFramerateLimit(60);

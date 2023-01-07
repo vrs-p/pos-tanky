@@ -3,7 +3,15 @@
 //
 #include "Button.h"
 
-
+/**
+ * Inspired by this tutorial
+ * https://www.youtube.com/watch?v=T31MoLJws4U
+ * @param size
+ * @param bgColor
+ * @param text
+ * @param characterSize
+ * @param textColor
+ */
 Button::Button(sf::Vector2f size, sf::Color bgColor, std::string text, int characterSize, sf::Color textColor) {
     this->text_.setString(text);
     this->text_.setFillColor(textColor);

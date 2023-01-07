@@ -3,6 +3,9 @@
 //
 #include "Tank.h"
 
+/**
+ * Constructor for Tank class.
+ */
 Tank::Tank() {
     this->left_ = false;
 
@@ -20,6 +23,9 @@ Tank::Tank() {
     this->lastFire_ = std::chrono::system_clock::now();
 }
 
+/**
+ * Destructor for Tank class.
+ */
 Tank::~Tank() {
     delete this->tankSprite_;
     tankSprite_ = nullptr;
@@ -31,26 +37,41 @@ Tank::~Tank() {
     bullet_ = nullptr;
 }
 
+/**
+ * By calling this function you'll move tank UP and change its direction.
+ */
 void Tank::moveUp() {
     this->rotate(UP);
     this->tankSprite_->move(sf::Vector2f(0, -this->speed_));
 }
 
+/**
+ * By calling this function you'll move tank DOWN and change its direction.
+ */
 void Tank::moveDown() {
     this->rotate(DOWN);
     this->tankSprite_->move(sf::Vector2f(0, this->speed_));
 }
 
+/**
+ * By calling this function you'll move tank LEFT and change its direction.
+ */
 void Tank::moveLeft() {
     this->rotate(LEFT);
     this->tankSprite_->move(sf::Vector2f(-this->speed_, 0));
 }
 
+/**
+ * By calling this function you'll move tank RIGHT and change its direction.
+ */
 void Tank::moveRight() {
     this->rotate(RIGHT);
     this->tankSprite_->move(sf::Vector2f(this->speed_, 0));
 }
 
+/**
+ * By calling this function you'll fire from tank.
+ */
 void Tank::fire() {
     std::chrono::duration<double> duration = std::chrono::system_clock::now() - this->lastFire_;
 
@@ -83,6 +104,10 @@ void Tank::fire() {
     }
 }
 
+/**
+ * By calling this function you are able to change direction of tank
+ * @param dir new direction of tank
+ */
 void Tank::rotate(DIRECTION dir) {
     float xSize = this->tankSprite_->getTexture()->getSize().x * this->tankSprite_->getScale().x;
     float ySize = this->tankSprite_->getTexture()->getSize().y * this->tankSprite_->getScale().y;
@@ -179,6 +204,11 @@ void Tank::rotate(DIRECTION dir) {
     this->direction_ = dir;
 }
 
+/**
+ * By calling this function you'll render icon of tank.
+ * And if tank fired a bullet you'll call render function of bullet too.
+ * @param window window on which we want to render icons
+ */
 void Tank::render(sf::RenderWindow &window) {
     if (this->bullet_->wasFired()) {
         this->bullet_->render(window);
@@ -187,58 +217,112 @@ void Tank::render(sf::RenderWindow &window) {
     window.draw(*this->tankSprite_);
 }
 
+/**
+ * By calling this function you'll lock mutex
+ */
 void Tank::lockMutex() {
     this->mutex_.lock();
 }
 
+/**
+ * By calling this function you'll unlock mutex
+ */
 void Tank::unlockMutex() {
     this->mutex_.unlock();
 }
 
+/**
+ * Setter for direction of tank
+ * @param dir new direction
+ */
 void Tank::setDirection(DIRECTION dir) {
     this->direction_ = dir;
 }
 
+/**
+ * Setter for player ID
+ * @param pId
+ */
 void Tank::setPlayerId(int pId) {
     this->playerId_ = pId;
 }
 
+/**
+ * Setter for player name
+ * @param name
+ */
 void Tank::setPlayerName(std::string name) {
     this->playerName_ = name;
 }
 
+/**
+ * By calling this function you are able to set information if player left the game
+ */
 void Tank::setLeft(bool left) {
     this->left_ = left;
 }
 
+/**
+ * Setter for score of player.
+ * @param score Score of player
+ */
 void Tank::setScore(int score) {
     this->score_ = score;
 }
 
+/**
+ * Getter for sprite.
+ * It's icon of tank where is stored position and size of tank.
+ * @return
+ */
 sf::Sprite *Tank::getSprite() {
     return this->tankSprite_;
 }
 
+/**
+ * Getter for direction of tank
+ * @return Direction of tank
+ */
 int Tank::getDirection() {
     return static_cast<int>(this->direction_);
 }
 
+/**
+ * Getter for player ID
+ * @return Player ID
+ */
 int Tank::getPlayerId() const {
     return this->playerId_;
 }
 
+/**
+ * Getter for name of player
+ * @return Name of player
+ */
 std::string Tank::getPlayerName() {
     return this->playerName_;
 }
 
+/**
+ * Getter for bullet of tank
+ * @return Instance of Bullet class
+ */
 Bullet *Tank::getBullet() {
     return this->bullet_;
 }
 
+/**
+ * Getter for information if player left the game
+ * @return if player left the game
+ */
 bool Tank::getLeft() {
     return this->left_;
 }
 
+/**
+ * Getter for score of player.
+ * @return score of player
+ */
 int Tank::getScore() {
     return this->score_;
 }

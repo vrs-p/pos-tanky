@@ -3,7 +3,13 @@
 //
 #include "Textbox.h"
 
-
+/**
+ * Inspired by this tutorial
+ * https://www.youtube.com/watch?v=T31MoLJws4U
+ * @param size
+ * @param color
+ * @param isSelected
+ */
 Textbox::Textbox(int size, sf::Color color, bool isSelected) {
     this->textBox_.setCharacterSize(size);
     this->textBox_.setFillColor(color);
