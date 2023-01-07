@@ -371,60 +371,62 @@ void Application::checkBulletCollision() {
             float bulletSizeY = bullet->getBulletSize().y;
 
             for (Tank *tank: *this->otherTanks_) {
-                float tankPosX = tank->getSprite()->getPosition().x;
-                float tankPosY = tank->getSprite()->getPosition().y;
-                float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
-                float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
+                if (!tank->getLeft()) {
+                    float tankPosX = tank->getSprite()->getPosition().x;
+                    float tankPosY = tank->getSprite()->getPosition().y;
+                    float tankSizeX = tank->getSprite()->getTexture()->getSize().x * tank->getSprite()->getScale().x;
+                    float tankSizeY = tank->getSprite()->getTexture()->getSize().y * tank->getSprite()->getScale().y;
 
-                if (bullet->wasFired()) {
-                    switch (tank->getDirection()) {
-                        case UP:
-                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeX &&
-                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeY) {
-                                bullet->setFired(false);
-                                this->playerWasKilled_ = true;
-                                this->idOfKilledPlayer_ = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex_);
-                                this->sendDataBool_ = true;
-                                this->sendDataCond_->notify_one();
-                            }
-                            break;
+                    if (bullet->wasFired()) {
+                        switch (tank->getDirection()) {
+                            case UP:
+                                if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeX &&
+                                    bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeY) {
+                                    bullet->setFired(false);
+                                    this->playerWasKilled_ = true;
+                                    this->idOfKilledPlayer_ = tank->getPlayerId();
+                                    std::unique_lock<std::mutex> loc(*this->mutex_);
+                                    this->sendDataBool_ = true;
+                                    this->sendDataCond_->notify_one();
+                                }
+                                break;
 
-                        case DOWN:
-                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
-                                bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
-                                bullet->setFired(false);
-                                this->playerWasKilled_ = true;
-                                this->idOfKilledPlayer_ = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex_);
-                                this->sendDataBool_ = true;
-                                this->sendDataCond_->notify_one();
-                            }
-                            break;
+                            case DOWN:
+                                if (bulletPosX + bulletSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
+                                    bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
+                                    bullet->setFired(false);
+                                    this->playerWasKilled_ = true;
+                                    this->idOfKilledPlayer_ = tank->getPlayerId();
+                                    std::unique_lock<std::mutex> loc(*this->mutex_);
+                                    this->sendDataBool_ = true;
+                                    this->sendDataCond_->notify_one();
+                                }
+                                break;
 
-                        case LEFT:
-                            if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
-                                bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
-                                bullet->setFired(false);
-                                this->playerWasKilled_ = true;
-                                this->idOfKilledPlayer_ = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex_);
-                                this->sendDataBool_ = true;
-                                this->sendDataCond_->notify_one();
-                            }
-                            break;
+                            case LEFT:
+                                if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
+                                    bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
+                                    bullet->setFired(false);
+                                    this->playerWasKilled_ = true;
+                                    this->idOfKilledPlayer_ = tank->getPlayerId();
+                                    std::unique_lock<std::mutex> loc(*this->mutex_);
+                                    this->sendDataBool_ = true;
+                                    this->sendDataCond_->notify_one();
+                                }
+                                break;
 
-                        case RIGHT:
-                            if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
-                                bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
-                                bullet->setFired(false);
-                                this->playerWasKilled_ = true;
-                                this->idOfKilledPlayer_ = tank->getPlayerId();
-                                std::unique_lock<std::mutex> loc(*this->mutex_);
-                                this->sendDataBool_ = true;
-                                this->sendDataCond_->notify_one();
-                            }
-                            break;
+                            case RIGHT:
+                                if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
+                                    bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
+                                    bullet->setFired(false);
+                                    this->playerWasKilled_ = true;
+                                    this->idOfKilledPlayer_ = tank->getPlayerId();
+                                    std::unique_lock<std::mutex> loc(*this->mutex_);
+                                    this->sendDataBool_ = true;
+                                    this->sendDataCond_->notify_one();
+                                }
+                                break;
+                        }
                     }
                 }
             }
