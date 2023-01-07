@@ -45,6 +45,9 @@ Application::~Application() {
     }
     delete this->otherTanks_;
     this->otherTanks_ = nullptr;
+
+    delete this->map_;
+    this->map_ = nullptr;
 }
 
 /**
