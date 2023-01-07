@@ -1,6 +1,7 @@
 //
 // Created by filip on 28. 12. 2022.
 //
+#include <iostream>
 #include "Bullet.h"
 
 /**
@@ -26,11 +27,11 @@ Bullet::~Bullet() {
  * By calling this function you'll render bullet in window
  * @param window window in which we want to render bullet
  */
-void Bullet::render(sf::RenderWindow &window) {
+void Bullet::render(sf::RenderWindow &window, std::vector<sf::RectangleShape *>* listOfWalls) {
     float xPosition = this->bulletIcon_->getPosition().x;
     float yPosition = this->bulletIcon_->getPosition().y;
 
-    if (xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800 && this->fired_) {
+    if (this->checkBorders(listOfWalls) && this->fired_) {
         moveBullet();
         window.draw(*this->bulletIcon_);
     } else {
@@ -129,4 +130,28 @@ void Bullet::moveBullet() {
     } else {
         this->bulletIcon_->move(sf::Vector2f(this->speed_, 0.0f));
     }
+}
+
+bool Bullet::checkBorders(std::vector<sf::RectangleShape *>* listOfWalls) {
+    bool canContinue = true;
+    float xPosition = this->bulletIcon_->getPosition().x;
+    float yPosition = this->bulletIcon_->getPosition().y;
+
+    for (sf::RectangleShape* wall: *listOfWalls) {
+        float wallPosX = wall->getPosition().x;
+        float wallPosY = wall->getPosition().y;
+        float wallSizeX = wall->getSize().x;
+        float wallSizeY = wall->getSize().y;
+        std::cout << "X: " << wallSizeX << " Y: " << wallSizeY;
+        if (xPosition >= wallPosX && xPosition < wallPosX + wallSizeX &&
+            yPosition >= yPosition && yPosition < wallPosY + wallSizeY) {
+            canContinue = false;
+        }
+    }
+
+    if (xPosition < 0 || xPosition > 800 || yPosition < 0 || yPosition > 800) {
+        canContinue = false;
+    }
+
+    return canContinue;
 }

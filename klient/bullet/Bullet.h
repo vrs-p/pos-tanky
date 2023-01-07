@@ -14,7 +14,7 @@ public:
     Bullet();
     ~Bullet();
 
-    void render(sf::RenderWindow& renderer);
+    void render(sf::RenderWindow& renderer, std::vector<sf::RectangleShape *>* listOfWalls);
     void shotBullet(float xPosition, float yPosition, DIRECTION direction);
     void setFired(bool fired);
     void setWasFiredAndSent();
@@ -23,6 +23,7 @@ public:
     sf::Vector2f getBulletSize();
     bool wasFired() const;
     bool wasFiredAndSent() const;
+    bool checkBorders(std::vector<sf::RectangleShape *>* listOfWalls);
 
 private:
     float speed_;

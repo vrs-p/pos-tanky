@@ -8,6 +8,7 @@
  * Constructor for Application class
  */
 Application::Application() {
+    this->map_ = new Map();
     this->packetSend_ = sf::Packet{};
     this->id_ = 0;
 
@@ -339,6 +340,59 @@ void Application::readClientInput() {
 void Application::checkBorders() {
     float xPosition = this->clientTank_->getSprite()->getPosition().x;
     float yPosition = this->clientTank_->getSprite()->getPosition().y;
+    float tankSizeX = this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
+    float tankSizeY = this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
+
+    for (sf::RectangleShape* wall: *this->map_->getListOfWalls()) {
+        float wallPosX = wall->getPosition().x;
+        float wallPosY = wall->getPosition().y;
+        float wallSizeX = wall->getSize().x;
+        float wallSizeY = wall->getSize().y;
+        switch (this->clientTank_->getDirection()) {
+            case UP:
+                if (xPosition + tankSizeX >= wallPosX && xPosition <= wallPosX + wallSizeX &&
+                    yPosition + tankSizeY >= wallPosY && yPosition <= wallPosY + wallSizeY) {
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-wallSizeX, wallPosY-wallSizeY));
+                }
+                break;
+
+//            case DOWN:
+//                if (xPosition + tankSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
+//                    bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
+//                    bullet->setFired(false);
+//                    this->playerWasKilled_ = true;
+//                    this->idOfKilledPlayer_ = tank->getPlayerId();
+//                    std::unique_lock<std::mutex> loc(*this->mutex_);
+//                    this->sendDataBool_ = true;
+//                    this->sendDataCond_->notify_one();
+//                }
+//                break;
+//
+//            case LEFT:
+//                if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
+//                    bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
+//                    bullet->setFired(false);
+//                    this->playerWasKilled_ = true;
+//                    this->idOfKilledPlayer_ = tank->getPlayerId();
+//                    std::unique_lock<std::mutex> loc(*this->mutex_);
+//                    this->sendDataBool_ = true;
+//                    this->sendDataCond_->notify_one();
+//                }
+//                break;
+//
+//            case RIGHT:
+//                if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
+//                    bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
+//                    bullet->setFired(false);
+//                    this->playerWasKilled_ = true;
+//                    this->idOfKilledPlayer_ = tank->getPlayerId();
+//                    std::unique_lock<std::mutex> loc(*this->mutex_);
+//                    this->sendDataBool_ = true;
+//                    this->sendDataCond_->notify_one();
+//                }
+//                break;
+        }
+    }
 
     if (xPosition > SCREEN_WIDTH) {
         this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
@@ -440,7 +494,7 @@ void Application::checkBulletCollision() {
 void Application::draw() {
     this->window_->clear();
 
-    this->clientTank_->render(*this->window_);
+    this->clientTank_->render(*this->window_, this->map_->getListOfWalls());
 
     float tankPosX = this->clientTank_->getSprite()->getPosition().x;
     float tankPosY = this->clientTank_->getSprite()->getPosition().y;
@@ -478,9 +532,13 @@ void Application::draw() {
     for (Tank *tank: *this->otherTanks_) {
         tank->lockMutex();
         if (!tank->getLeft()) {
-            tank->render(*this->window_);
+            tank->render(*this->window_, this->map_->getListOfWalls());
         }
         tank->unlockMutex();
+    }
+
+    for (sf::RectangleShape* wall: *this->map_->getListOfWalls()) {
+        this->window_->draw(*wall);
     }
 
     this->window_->display();
