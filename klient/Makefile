@@ -1,5 +1,6 @@
-LIBS=-L src/lib -lsfml-system -lsfml-network -lsfml-graphics -lsfml-window -pthread
+LIBS=-L src/lib -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network  -pthread
 INCLUDE=-I src/include
+STATIC=yes
 
 all: client
 
@@ -15,6 +16,9 @@ Menu.o: windows/Menu.h windows/Menu.cpp
 ShowScore.o: windows/ShowScore.h windows/ShowScore.cpp
 	g++ $(INCLUDE) -c "windows/ShowScore.cpp" -o ShowScore.o
 
+Map.o: map/Map.h map/Map.cpp
+	g++ $(INCLUDE) -c "map/Map.cpp" -o Map.o
+
 Bullet.o: bullet/Bullet.h bullet/Bullet.cpp
 	g++ $(INCLUDE) -c "bullet/Bullet.cpp" -o Bullet.o
 
@@ -27,9 +31,9 @@ Application.o: application/Application.h application/Application.cpp
 main.o: main.cpp
 	g++ $(INCLUDE) -c "main.cpp" -o main.o
 
-client: main.o Button.o Textbox.o Menu.o ShowScore.o Bullet.o Tank.o Application.o
+client: main.o Button.o Textbox.o Menu.o ShowScore.o Map.o Bullet.o Tank.o Application.o
 	@echo "** Building game"
-	g++ -o client Button.o Textbox.o Menu.o ShowScore.o Bullet.o Tank.o Application.o main.o $(INCLUDE) $(LIBS)
+	g++ -o client Button.o Textbox.o Menu.o ShowScore.o Map.o Bullet.o Tank.o Application.o main.o $(INCLUDE) $(LIBS)
 
 clean:
 	@echo "** Removing object files and executable..."
