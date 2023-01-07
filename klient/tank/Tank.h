@@ -23,7 +23,7 @@ public:
     void fire();
     void rotate(DIRECTION dir);
 
-    void render(sf::RenderWindow& renderer);
+    void render(sf::RenderWindow& renderer, std::vector<sf::RectangleShape *>* listOfWalls);
 
     void lockMutex();
     void unlockMutex();

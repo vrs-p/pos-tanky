@@ -1,6 +1,7 @@
 //
 // Created by filip on 28. 12. 2022.
 //
+#include <iostream>
 #include "Bullet.h"
 
 /**
@@ -26,11 +27,8 @@ Bullet::~Bullet() {
  * By calling this function you'll render bullet in window
  * @param window window in which we want to render bullet
  */
-void Bullet::render(sf::RenderWindow &window) {
-    float xPosition = this->bulletIcon_->getPosition().x;
-    float yPosition = this->bulletIcon_->getPosition().y;
-
-    if (xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800 && this->fired_) {
+void Bullet::render(sf::RenderWindow &window, std::vector<sf::RectangleShape *>* listOfWalls) {
+    if (this->checkBorders(listOfWalls) && this->fired_) {
         moveBullet();
         window.draw(*this->bulletIcon_);
     } else {
@@ -129,4 +127,28 @@ void Bullet::moveBullet() {
     } else {
         this->bulletIcon_->move(sf::Vector2f(this->speed_, 0.0f));
     }
+}
+
+/**
+ * By calling this function it'll check if bullet is not outside of borders
+ * It also checks if bullet is touching the wall
+ * @param listOfWalls
+ * @return
+ */
+bool Bullet::checkBorders(std::vector<sf::RectangleShape *>* listOfWalls) {
+    bool canContinue = true;
+    float xPosition = this->bulletIcon_->getPosition().x;
+    float yPosition = this->bulletIcon_->getPosition().y;
+
+    for (sf::RectangleShape* wall: *listOfWalls) {
+        if (wall->getGlobalBounds().intersects(this->bulletIcon_->getGlobalBounds())) {
+            canContinue = false;
+        }
+    }
+
+    if (xPosition < 0 || xPosition > 800 || yPosition < 0 || yPosition > 800) {
+        canContinue = false;
+    }
+
+    return canContinue;
 }

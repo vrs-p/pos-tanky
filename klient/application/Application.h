@@ -11,6 +11,7 @@
 #include <condition_variable>
 #include <mutex>
 #include "../tank/Tank.h"
+#include "../map/Map.h"
 
 #ifndef KLIENT_APPLICATION_H
 #define KLIENT_APPLICATION_H
@@ -37,6 +38,7 @@ public:
     std::vector<Tank*>* getOthersTanks();
 
 private:
+    Map* map_;
     sf::IpAddress ipAddress_;
     int port_;
     sf::UdpSocket socket_;

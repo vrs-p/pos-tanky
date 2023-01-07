@@ -209,9 +209,9 @@ void Tank::rotate(DIRECTION dir) {
  * And if tank fired a bullet you'll call render function of bullet too.
  * @param window window on which we want to render icons
  */
-void Tank::render(sf::RenderWindow &window) {
+void Tank::render(sf::RenderWindow &window, std::vector<sf::RectangleShape *>* listOfWalls) {
     if (this->bullet_->wasFired()) {
-        this->bullet_->render(window);
+        this->bullet_->render(window, listOfWalls);
     }
 
     window.draw(*this->tankSprite_);

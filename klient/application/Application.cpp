@@ -8,6 +8,7 @@
  * Constructor for Application class
  */
 Application::Application() {
+    this->map_ = new Map();
     this->packetSend_ = sf::Packet{};
     this->id_ = 0;
 
@@ -195,7 +196,6 @@ void Application::waitForGameSettings() {
     packetReceive.clear();
 
     if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
-        std::cout << "Packet with game settings was received\n";
 
     for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
         packetReceive >> pId;
@@ -255,7 +255,6 @@ void Application::waitForGameSettings() {
 
         this->otherTanks_->push_back(tmpTank);
     }
-
 }
 
 /**
@@ -335,10 +334,38 @@ void Application::readClientInput() {
 
 /**
  * By calling this function it'll check if tank is not outside of borders
+ * It also checks if tank is touching the wall
  */
 void Application::checkBorders() {
     float xPosition = this->clientTank_->getSprite()->getPosition().x;
     float yPosition = this->clientTank_->getSprite()->getPosition().y;
+
+    for (sf::RectangleShape* wall: *this->map_->getListOfWalls()) {
+        float wallPosX = wall->getPosition().x;
+        float wallPosY = wall->getPosition().y;
+        float wallSizeX = wall->getSize().x;
+        float wallSizeY = wall->getSize().y;
+
+        if (this->clientTank_->getSprite()->getGlobalBounds().intersects(wall->getGlobalBounds())) {
+            switch (this->clientTank_->getDirection()) {
+                case UP:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, wallPosY + wallSizeY + 1));
+                    break;
+
+                case DOWN:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, wallPosY - 1));
+                    break;
+
+                case LEFT:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(wallPosX + wallSizeX + 1, yPosition));
+                    break;
+
+                case RIGHT:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(wallPosX - 1, yPosition));
+                    break;
+            }
+        }
+    }
 
     if (xPosition > SCREEN_WIDTH) {
         this->clientTank_->getSprite()->setPosition(sf::Vector2f(SCREEN_WIDTH, yPosition));
@@ -440,7 +467,7 @@ void Application::checkBulletCollision() {
 void Application::draw() {
     this->window_->clear();
 
-    this->clientTank_->render(*this->window_);
+    this->clientTank_->render(*this->window_, this->map_->getListOfWalls());
 
     float tankPosX = this->clientTank_->getSprite()->getPosition().x;
     float tankPosY = this->clientTank_->getSprite()->getPosition().y;
@@ -478,9 +505,13 @@ void Application::draw() {
     for (Tank *tank: *this->otherTanks_) {
         tank->lockMutex();
         if (!tank->getLeft()) {
-            tank->render(*this->window_);
+            tank->render(*this->window_, this->map_->getListOfWalls());
         }
         tank->unlockMutex();
+    }
+
+    for (sf::RectangleShape* wall: *this->map_->getListOfWalls()) {
+        this->window_->draw(*wall);
     }
 
     this->window_->display();
@@ -535,8 +566,6 @@ void Application::receiveData() {
                 packetReceive >> positionY;
                 packetReceive >> direction;
                 packetReceive >> killerId;
-
-                std::cout << "Killed player: " << pId << "Killer is: " << killerId;
 
                 if (pId == this->id_) {
                     this->clientTank_->getBullet()->setFired(false);
@@ -626,7 +655,6 @@ void Application::sendData() {
                 packetSend << (static_cast<int>(KILLED) + 1);
                 packetSend << this->idOfKilledPlayer_;
                 packetSend << this->clientTank_->getPlayerId();
-                std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer_ << "\n";
                 this->playerWasKilled_ = false;
                 this->clientTank_->getBullet()->resetWasFiredAndSent();
             } else if (this->isRunning_) {
