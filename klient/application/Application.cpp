@@ -196,7 +196,6 @@ void Application::waitForGameSettings() {
     packetReceive.clear();
 
     if (this->socket_.receive(packetReceive, ipAddress, port) == sf::Socket::Done)
-        std::cout << "Packet with game settings was received\n";
 
     for (int i = 0; i < this->numberOfPlayers_ - 1; ++i) {
         packetReceive >> pId;
@@ -256,7 +255,6 @@ void Application::waitForGameSettings() {
 
         this->otherTanks_->push_back(tmpTank);
     }
-
 }
 
 /**
@@ -569,8 +567,6 @@ void Application::receiveData() {
                 packetReceive >> direction;
                 packetReceive >> killerId;
 
-                std::cout << "Killed player: " << pId << "Killer is: " << killerId;
-
                 if (pId == this->id_) {
                     this->clientTank_->getBullet()->setFired(false);
                     this->clientTank_->rotate(static_cast<DIRECTION>(direction));
@@ -659,7 +655,6 @@ void Application::sendData() {
                 packetSend << (static_cast<int>(KILLED) + 1);
                 packetSend << this->idOfKilledPlayer_;
                 packetSend << this->clientTank_->getPlayerId();
-                std::cout << "Player " << this->clientTank_->getPlayerId() << " Killed " << this->idOfKilledPlayer_ << "\n";
                 this->playerWasKilled_ = false;
                 this->clientTank_->getBullet()->resetWasFiredAndSent();
             } else if (this->isRunning_) {

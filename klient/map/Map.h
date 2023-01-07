@@ -1,11 +1,11 @@
 //
 // Created by filip on 7. 1. 2023.
 //
+#include <SFML/Graphics.hpp>
 
 #ifndef KLIENT_MAP_H
 #define KLIENT_MAP_H
 
-#include <SFML/Graphics.hpp>
 
 class Map {
 public:

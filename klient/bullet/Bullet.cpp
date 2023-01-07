@@ -28,9 +28,6 @@ Bullet::~Bullet() {
  * @param window window in which we want to render bullet
  */
 void Bullet::render(sf::RenderWindow &window, std::vector<sf::RectangleShape *>* listOfWalls) {
-    float xPosition = this->bulletIcon_->getPosition().x;
-    float yPosition = this->bulletIcon_->getPosition().y;
-
     if (this->checkBorders(listOfWalls) && this->fired_) {
         moveBullet();
         window.draw(*this->bulletIcon_);
