@@ -8,12 +8,12 @@ Map::Map() {
     this->listOfWalls_ = new std::vector<sf::RectangleShape *>();
 
     sf::RectangleShape* tmpShape = new sf::RectangleShape();
-    tmpShape->setSize(sf::Vector2f(200.0, 2.0));
+    tmpShape->setSize(sf::Vector2f(200.0, 10.0));
     tmpShape->setPosition(sf::Vector2f(350.0, 400.0));
     this->listOfWalls_->push_back(tmpShape);
 
     tmpShape = new sf::RectangleShape();
-    tmpShape->setSize(sf::Vector2f(2.0, 200.0));
+    tmpShape->setSize(sf::Vector2f(10.0, 200.0));
     tmpShape->setPosition(sf::Vector2f(350.0, 400.0));
     this->listOfWalls_->push_back(tmpShape);
 }

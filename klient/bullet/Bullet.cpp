@@ -143,10 +143,14 @@ bool Bullet::checkBorders(std::vector<sf::RectangleShape *>* listOfWalls) {
         float wallSizeX = wall->getSize().x;
         float wallSizeY = wall->getSize().y;
         std::cout << "X: " << wallSizeX << " Y: " << wallSizeY;
-        if (xPosition >= wallPosX && xPosition < wallPosX + wallSizeX &&
-            yPosition >= yPosition && yPosition < wallPosY + wallSizeY) {
+        if (wall->getGlobalBounds().intersects(this->bulletIcon_->getGlobalBounds())) {
             canContinue = false;
         }
+//
+//        if (xPosition >= wallPosX && xPosition < wallPosX + wallSizeX &&
+//            yPosition >= yPosition && yPosition < wallPosY + wallSizeY) {
+//            canContinue = false;
+//        }
     }
 
     if (xPosition < 0 || xPosition > 800 || yPosition < 0 || yPosition > 800) {

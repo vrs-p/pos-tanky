@@ -348,13 +348,18 @@ void Application::checkBorders() {
         float wallPosY = wall->getPosition().y;
         float wallSizeX = wall->getSize().x;
         float wallSizeY = wall->getSize().y;
-        switch (this->clientTank_->getDirection()) {
-            case UP:
-                if (xPosition + tankSizeX >= wallPosX && xPosition <= wallPosX + wallSizeX &&
-                    yPosition + tankSizeY >= wallPosY && yPosition <= wallPosY + wallSizeY) {
-                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-wallSizeX, wallPosY-wallSizeY));
-                }
-                break;
+
+        if (this->clientTank_->getSprite()->getGlobalBounds().intersects(wall->getGlobalBounds())) {
+            this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-tankSizeX, wallPosY-tankSizeY));
+        }
+
+//        switch (this->clientTank_->getDirection()) {
+//            case UP:
+//                if (xPosition + tankSizeX >= wallPosX && xPosition <= wallPosX + wallSizeX &&
+//                    yPosition + tankSizeY >= wallPosY && yPosition <= wallPosY + wallSizeY) {
+//                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-wallSizeX, wallPosY-wallSizeY));
+//                }
+//                break;
 
 //            case DOWN:
 //                if (xPosition + tankSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
@@ -391,7 +396,7 @@ void Application::checkBorders() {
 //                    this->sendDataCond_->notify_one();
 //                }
 //                break;
-        }
+//        }
     }
 
     if (xPosition > SCREEN_WIDTH) {
