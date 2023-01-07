@@ -132,25 +132,21 @@ void Bullet::moveBullet() {
     }
 }
 
+/**
+ * By calling this function it'll check if bullet is not outside of borders
+ * It also checks if bullet is touching the wall
+ * @param listOfWalls
+ * @return
+ */
 bool Bullet::checkBorders(std::vector<sf::RectangleShape *>* listOfWalls) {
     bool canContinue = true;
     float xPosition = this->bulletIcon_->getPosition().x;
     float yPosition = this->bulletIcon_->getPosition().y;
 
     for (sf::RectangleShape* wall: *listOfWalls) {
-        float wallPosX = wall->getPosition().x;
-        float wallPosY = wall->getPosition().y;
-        float wallSizeX = wall->getSize().x;
-        float wallSizeY = wall->getSize().y;
-        std::cout << "X: " << wallSizeX << " Y: " << wallSizeY;
         if (wall->getGlobalBounds().intersects(this->bulletIcon_->getGlobalBounds())) {
             canContinue = false;
         }
-//
-//        if (xPosition >= wallPosX && xPosition < wallPosX + wallSizeX &&
-//            yPosition >= yPosition && yPosition < wallPosY + wallSizeY) {
-//            canContinue = false;
-//        }
     }
 
     if (xPosition < 0 || xPosition > 800 || yPosition < 0 || yPosition > 800) {

@@ -13,6 +13,7 @@ public:
     ~Map();
 
     std::vector<sf::RectangleShape*>* getListOfWalls();
+
 private:
     std::vector<sf::RectangleShape*>* listOfWalls_;
 };

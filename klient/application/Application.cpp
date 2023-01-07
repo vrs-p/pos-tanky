@@ -336,12 +336,11 @@ void Application::readClientInput() {
 
 /**
  * By calling this function it'll check if tank is not outside of borders
+ * It also checks if tank is touching the wall
  */
 void Application::checkBorders() {
     float xPosition = this->clientTank_->getSprite()->getPosition().x;
     float yPosition = this->clientTank_->getSprite()->getPosition().y;
-    float tankSizeX = this->clientTank_->getSprite()->getTexture()->getSize().x * this->clientTank_->getSprite()->getScale().x;
-    float tankSizeY = this->clientTank_->getSprite()->getTexture()->getSize().y * this->clientTank_->getSprite()->getScale().y;
 
     for (sf::RectangleShape* wall: *this->map_->getListOfWalls()) {
         float wallPosX = wall->getPosition().x;
@@ -350,53 +349,24 @@ void Application::checkBorders() {
         float wallSizeY = wall->getSize().y;
 
         if (this->clientTank_->getSprite()->getGlobalBounds().intersects(wall->getGlobalBounds())) {
-            this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-tankSizeX, wallPosY-tankSizeY));
+            switch (this->clientTank_->getDirection()) {
+                case UP:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, wallPosY + wallSizeY + 1));
+                    break;
+
+                case DOWN:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition, wallPosY - 1));
+                    break;
+
+                case LEFT:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(wallPosX + wallSizeX + 1, yPosition));
+                    break;
+
+                case RIGHT:
+                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(wallPosX - 1, yPosition));
+                    break;
+            }
         }
-
-//        switch (this->clientTank_->getDirection()) {
-//            case UP:
-//                if (xPosition + tankSizeX >= wallPosX && xPosition <= wallPosX + wallSizeX &&
-//                    yPosition + tankSizeY >= wallPosY && yPosition <= wallPosY + wallSizeY) {
-//                    this->clientTank_->getSprite()->setPosition(sf::Vector2f(xPosition-wallSizeX, wallPosY-wallSizeY));
-//                }
-//                break;
-
-//            case DOWN:
-//                if (xPosition + tankSizeX >= tankPosX - tankSizeX && bulletPosX <= tankPosX &&
-//                    bulletPosY + bulletSizeY >= tankPosY - tankSizeY && bulletPosY <= tankPosY) {
-//                    bullet->setFired(false);
-//                    this->playerWasKilled_ = true;
-//                    this->idOfKilledPlayer_ = tank->getPlayerId();
-//                    std::unique_lock<std::mutex> loc(*this->mutex_);
-//                    this->sendDataBool_ = true;
-//                    this->sendDataCond_->notify_one();
-//                }
-//                break;
-//
-//            case LEFT:
-//                if (bulletPosX + bulletSizeX >= tankPosX && bulletPosX <= tankPosX + tankSizeY &&
-//                    bulletPosY + bulletSizeY >= tankPosY - tankSizeX && bulletPosY <= tankPosY) {
-//                    bullet->setFired(false);
-//                    this->playerWasKilled_ = true;
-//                    this->idOfKilledPlayer_ = tank->getPlayerId();
-//                    std::unique_lock<std::mutex> loc(*this->mutex_);
-//                    this->sendDataBool_ = true;
-//                    this->sendDataCond_->notify_one();
-//                }
-//                break;
-//
-//            case RIGHT:
-//                if (bulletPosX + bulletSizeX >= tankPosX - tankSizeY && bulletPosX <= tankPosX &&
-//                    bulletPosY + bulletSizeY >= tankPosY && bulletPosY <= tankPosY + tankSizeX) {
-//                    bullet->setFired(false);
-//                    this->playerWasKilled_ = true;
-//                    this->idOfKilledPlayer_ = tank->getPlayerId();
-//                    std::unique_lock<std::mutex> loc(*this->mutex_);
-//                    this->sendDataBool_ = true;
-//                    this->sendDataCond_->notify_one();
-//                }
-//                break;
-//        }
     }
 
     if (xPosition > SCREEN_WIDTH) {
