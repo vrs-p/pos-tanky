@@ -265,7 +265,6 @@ void Application::waitForGameSettings() {
  */
 void Application::render() {
     this->initializeWindow();
-    this->window_->setActive(true);
 
     while (this->isRunning_) {
         this->readClientInput();
